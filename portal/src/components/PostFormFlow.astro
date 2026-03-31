@@ -135,7 +135,7 @@
       <span class="mring mring-inner"></span>
     </div>
     <p class="text-viwra-bone/70 text-sm font-extralight tracking-widest leading-loose">
-      Frekans Senkronize Edildi.<br/>Beklemede Kal.
+      Frekans Senkronize Edildi.<br/>24 Saat İçinde Bilgilendirileceksin.
     </p>
   </div>
 
@@ -365,6 +365,27 @@
       if (timeLeft <= 0) { clearInterval(timerInterval!); onFocusPass(); }
     }, 1000);
   };
+  let analysisSoundCtx: AudioContext | null = null;
+  const playFocusSound = () => {
+    try {
+      if (!analysisSoundCtx) analysisSoundCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (analysisSoundCtx.state === 'suspended') analysisSoundCtx.resume();
+      
+      const osc = analysisSoundCtx.createOscillator();
+      const gain = analysisSoundCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(432, analysisSoundCtx.currentTime); 
+      gain.gain.setValueAtTime(0, analysisSoundCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.08, analysisSoundCtx.currentTime + 0.5);
+      gain.gain.exponentialRampToValueAtTime(0.001, analysisSoundCtx.currentTime + 2.5);
+      
+      osc.connect(gain);
+      gain.connect(analysisSoundCtx.destination);
+      osc.start();
+      osc.stop(analysisSoundCtx.currentTime + 3);
+    } catch(e) {}
+  };
 
   const resetFocus = () => {
     clearInterval(timerInterval!); timeLeft = 60; updateArc();
@@ -468,6 +489,7 @@
     });
 
   const onFocusPass = () => {
+    playFocusSound();
     cleanup(); switchPhase(pFocus, pAnalysis); setTimeout(runAnalysis, 700);
   };
 
