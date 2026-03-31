@@ -270,8 +270,11 @@
   let fluctInterval:  ReturnType<typeof setInterval> | null = null;
   let lastAccelMag      = 0;
   let motionStart: number | null = null;
+  let stillStart: number | null = null;
   const MOTION_THRESH   = 1.4;
   const MOTION_MS       = 400;
+  const STILL_THRESH    = 0.08; // Aşırı düşük titreme (masaya koyma) sınırı
+  const STILL_MS        = 25000; // Masada 25 saniye mükemmel hareketsiz kalırsa test yanar
   const CIRC            = 2 * Math.PI * 70;
 
   // DOM
@@ -387,10 +390,10 @@
     } catch(e) {}
   };
 
-  const resetFocus = () => {
+  const resetFocus = (customMsg?: string) => {
     clearInterval(timerInterval!); timeLeft = 60; updateArc();
     if ('vibrate' in navigator) navigator.vibrate([50, 30, 50]);
-    showGlitch("Protokol tutarsızlık saptadı.<br/><br/>Zihinsel frekans eşleşmiyor.<br/><br/>Sistem 5 saniye içinde yeniden sanitize edilecek.");
+    showGlitch(customMsg || "Protokol tutarsızlık saptadı.<br/><br/>Zihinsel frekans eşleşmiyor.<br/><br/>Sistem 5 saniye içinde yeniden sanitize edilecek.");
   };
 
   const showGlitch = (text: string) => {
@@ -418,10 +421,23 @@
     const a = e.accelerationIncludingGravity; if (!a || a.x === null) return;
     const mag = Math.sqrt((a.x??0)**2 + (a.y??0)**2 + (a.z??0)**2);
     const delta = Math.abs(mag - lastAccelMag); lastAccelMag = mag;
+    
+    // Hareket kontrolü (sarsılma)
     if (delta > MOTION_THRESH) {
       if (!motionStart) motionStart = Date.now();
       else if (Date.now() - motionStart > MOTION_MS) { motionStart = null; resetFocus(); }
     } else { motionStart = null; }
+
+    // Masa kontrolü (aşırı hareketsizlik / zero-vibration)
+    if (delta < STILL_THRESH) {
+      if (!stillStart) stillStart = Date.now();
+      else if (Date.now() - stillStart > STILL_MS) {
+        stillStart = null;
+        resetFocus("Cansız bir zemin tespit edildi.<br/><br/>Telefonu masaya bırakma. Elinde tutarak gerçek bir bağ kur.<br/><br/>Sistem yeniden başlatılıyor.");
+      }
+    } else {
+      stillStart = null;
+    }
   };
 
   const setupTouchFallback = () => {

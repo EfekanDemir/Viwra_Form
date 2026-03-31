@@ -123,11 +123,15 @@
 
     if (useFake) {
       fakeT += 0.04;
-      push(
-        Math.sin(fakeT * 1.3) * 0.5 + Math.sin(fakeT * 3.1) * 0.15,
-        Math.cos(fakeT * 0.9) * 0.35,
-        9.81 + Math.sin(fakeT * 0.5) * 0.18,
-      );
+      const fx = Math.sin(fakeT * 1.3) * 0.5 + Math.sin(fakeT * 3.1) * 0.15;
+      const fy = Math.cos(fakeT * 0.9) * 0.35;
+      const fz = 9.81 + Math.sin(fakeT * 0.5) * 0.18;
+      push(fx, fy, fz);
+      
+      // Masaüstü/İzinsiz durumda rakamlar da canlı görünsün
+      valX.textContent = fx.toFixed(2);
+      valY.textContent = fy.toFixed(2);
+      valZ.textContent = fz.toFixed(2);
     }
 
     const ch = H / 3;
@@ -151,11 +155,18 @@
   };
 
   // ── Open / Close ────────────────────────────────────────────────────────
-  const openModal = () => {
+  const openModal = async () => {
     modalOpen = true;
     modal.classList.remove('pointer-events-none');
     gsap.to(modal, { opacity: 1, duration: 0.6, ease: 'power2.out' });
     resizeCanvas();
+    
+    // iOS 13+ için sensör izni isteği
+    const dme = DeviceMotionEvent as any;
+    if (typeof dme?.requestPermission === 'function') {
+      try { await dme.requestPermission(); } catch (e) {}
+    }
+    
     window.addEventListener('devicemotion', onMotion);
     rafId = requestAnimationFrame(draw);
   };
