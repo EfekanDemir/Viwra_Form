@@ -1,0 +1,295 @@
+---
+// SelectionProtocol.astro — Step-by-step form with GSAP transitions
+---
+
+<section id="protocol-section" class="protocol-section min-h-screen flex flex-col items-center justify-center px-6 py-20">
+
+  <!-- Step dots -->
+  <div class="flex gap-3 mb-20" role="tablist" aria-label="Form adımları">
+    <span class="step-dot active" data-dot="0" role="tab" aria-selected="true"></span>
+    <span class="step-dot" data-dot="1" role="tab" aria-selected="false"></span>
+    <span class="step-dot" data-dot="2" role="tab" aria-selected="false"></span>
+  </div>
+
+  <!-- ─── Step 0: Tanımlama ──────────────────────────────────────── -->
+  <div class="protocol-step step-0 w-full max-w-xs" data-step="0">
+    <p class="text-viwra-bone/30 text-[10px] tracking-[0.45em] uppercase mb-10 text-center">
+      Tanımlama
+    </p>
+    <div class="space-y-6">
+      <input
+        id="input-name"
+        type="text"
+        class="protocol-input"
+        placeholder="Adın"
+        autocomplete="given-name"
+        inputmode="text"
+      />
+      <input
+        id="input-surname"
+        type="text"
+        class="protocol-input"
+        placeholder="Soyadın"
+        autocomplete="family-name"
+        inputmode="text"
+      />
+    </div>
+    <div class="flex justify-center mt-14">
+      <button class="continue-btn" id="btn-step0">İlerle</button>
+    </div>
+  </div>
+
+  <!-- ─── Step 1: Bağlantı ──────────────────────────────────────── -->
+  <div class="protocol-step step-1 w-full max-w-xs hidden" data-step="1">
+    <p class="text-viwra-bone/30 text-[10px] tracking-[0.45em] uppercase mb-10 text-center">
+      Bağlantı
+    </p>
+    <div class="space-y-6">
+      <input
+        id="input-email"
+        type="email"
+        class="protocol-input"
+        placeholder="E-posta"
+        autocomplete="email"
+        inputmode="email"
+      />
+      <input
+        id="input-phone"
+        type="tel"
+        class="protocol-input"
+        placeholder="Telefon"
+        autocomplete="tel"
+        inputmode="tel"
+      />
+    </div>
+    <div class="flex justify-between items-center mt-14">
+      <button class="continue-btn text-viwra-bone/20 hover:text-viwra-bone/45" id="btn-back1">← Geri</button>
+      <button class="continue-btn" id="btn-step1">İlerle</button>
+    </div>
+  </div>
+
+  <!-- ─── Step 2: Bilişsel Test ──────────────────────────────────── -->
+  <div class="protocol-step step-2 w-full max-w-sm hidden" data-step="2">
+    <p class="text-viwra-bone/30 text-[10px] tracking-[0.45em] uppercase mb-10 text-center">
+      Bilişsel Test
+    </p>
+    <p class="text-viwra-bone/75 text-base font-extralight leading-relaxed tracking-wide text-center mb-12">
+      Başkalarının odaklanmaya çalıştığı bir ortamda sessizliğe saygı gösterir misin?
+    </p>
+    <!-- Choices -->
+    <div class="space-y-1 mb-8" id="cognitive-choices">
+      <button class="choice-item" data-value="Kesinlikle dikkat ederim">
+        <span class="choice-marker">—</span>
+        <span>Kesinlikle dikkat ederim</span>
+      </button>
+      <button class="choice-item" data-value="Elimden geleni yaparım">
+        <span class="choice-marker">—</span>
+        <span>Elimden geleni yaparım</span>
+      </button>
+      <button class="choice-item" data-value="Kendi işime odaklanırım">
+        <span class="choice-marker">—</span>
+        <span>Kendi işime odaklanırım</span>
+      </button>
+    </div>
+    <div class="mb-14">
+      <input
+        id="input-mental"
+        type="text"
+        class="protocol-input text-center text-sm"
+        placeholder="Şu an kafanı en çok kurcalayan kelime? (İsteğe bağlı)"
+        autocomplete="off"
+      />
+    </div>
+    <div class="flex justify-between items-center">
+      <button class="continue-btn text-viwra-bone/20 hover:text-viwra-bone/45" id="btn-back2">← Geri</button>
+      <button class="continue-btn opacity-0 pointer-events-none" id="btn-step2">Tamamla</button>
+    </div>
+  </div>
+
+  <!-- ─── Step 3: Kabul / Başarı ─────────────────────────────────── -->
+  <div class="protocol-step step-3 w-full max-w-xs hidden text-center" data-step="3">
+    <!-- Mini rings -->
+    <div class="relative w-16 h-16 mx-auto mb-14 flex items-center justify-center">
+      <span class="absolute rounded-full border border-viwra-bone/20 animate-breathe"  style="width:64px;height:64px;"></span>
+      <span class="absolute rounded-full border border-viwra-bone/35 animate-breathe-mid" style="width:42px;height:42px;"></span>
+      <span class="absolute rounded-full border border-viwra-bone/55 animate-breathe-inner" style="width:20px;height:20px;"></span>
+    </div>
+    <p class="text-viwra-bone/35 text-[10px] tracking-[0.5em] uppercase mb-6">Protokol Tamamlandı</p>
+    <p class="text-viwra-bone/65 text-lg font-extralight tracking-wider leading-relaxed">
+      Yanıtların alındı.
+    </p>
+    <p class="text-viwra-bone/35 text-sm font-extralight tracking-wide mt-4">
+      Seni duyacağız.
+    </p>
+  </div>
+
+</section>
+
+<script>
+  import gsap from 'gsap';
+
+  // ── Local state ─────────────────────────────────────────────────────────
+  const formData: Record<string, string | number> = {
+    name: '', surname: '', email: '', phone: '', cognitive: '', mental: '',
+    timeMs: 0, backspaces: 0
+  };
+
+  let currentStep = 0;
+  let startTime = Date.now();
+  let backspaceCount = 0;
+
+  // Track backspaces passively
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace') backspaceCount++;
+  });
+
+  // ── DOM refs ────────────────────────────────────────────────────────────
+  const steps    = Array.from(document.querySelectorAll<HTMLElement>('.protocol-step'));
+  const dots     = Array.from(document.querySelectorAll<HTMLElement>('.step-dot'));
+
+  // ── Step transition ─────────────────────────────────────────────────────
+  function goToStep(nextIdx: number) {
+    const current = steps[currentStep];
+    const next    = steps[nextIdx];
+    if (!current || !next) return;
+
+    gsap.to(current, {
+      opacity: 0,
+      y: nextIdx > currentStep ? -28 : 28,
+      duration: 0.38,
+      ease: 'power2.in',
+      onComplete() {
+        current.style.display = 'none';
+        current.classList.add('hidden');
+
+        next.classList.remove('hidden');
+        next.style.display = 'flex';
+        next.style.flexDirection = 'column';
+
+        gsap.fromTo(
+          next,
+          { opacity: 0, y: nextIdx > currentStep ? 28 : -28 },
+          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        );
+
+        currentStep = nextIdx;
+        updateDots();
+
+        // Auto-focus first input in new step
+        const firstInput = next.querySelector<HTMLInputElement>('input');
+        if (firstInput) requestAnimationFrame(() => firstInput.focus());
+      },
+    });
+  }
+
+  function updateDots() {
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === currentStep);
+      dot.setAttribute('aria-selected', String(i === currentStep));
+    });
+  }
+
+  // ── Validators ──────────────────────────────────────────────────────────
+  const shake = (el: HTMLElement) => {
+    gsap.fromTo(el,
+      { x: 0 },
+      { x: 8, duration: 0.06, ease: 'power1.inOut', yoyo: true, repeat: 5,
+        onComplete: () => gsap.set(el, { x: 0 }) },
+    );
+  };
+
+  // ── Step 0: name ────────────────────────────────────────────────────────
+  const inputName    = document.getElementById('input-name') as HTMLInputElement;
+  const inputSurname = document.getElementById('input-surname') as HTMLInputElement;
+  document.getElementById('btn-step0')?.addEventListener('click', () => {
+    formData.name    = inputName.value.trim();
+    formData.surname = inputSurname.value.trim();
+    if (!formData.name) { shake(inputName); inputName.focus(); return; }
+    if (!formData.surname) { shake(inputSurname); inputSurname.focus(); return; }
+    goToStep(1);
+  });
+
+  // Enter key on step 0 fields
+  inputName.addEventListener('keydown',    e => { if (e.key === 'Enter') inputSurname.focus(); });
+  inputSurname.addEventListener('keydown', e => { if (e.key === 'Enter') (document.getElementById('btn-step0') as HTMLButtonElement).click(); });
+
+  // ── Step 1: contact ─────────────────────────────────────────────────────
+  const inputEmail = document.getElementById('input-email') as HTMLInputElement;
+  const inputPhone = document.getElementById('input-phone') as HTMLInputElement;
+  document.getElementById('btn-back1')?.addEventListener('click', () => goToStep(0));
+  document.getElementById('btn-step1')?.addEventListener('click', () => {
+    formData.email = inputEmail.value.trim();
+    formData.phone = inputPhone.value.trim();
+    
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
+    const phoneOk = /^\+?[0-9\s\-\(\)]{10,20}$/.test(formData.phone);
+    
+    if (!emailOk) { shake(inputEmail); inputEmail.focus(); return; }
+    if (!phoneOk) { shake(inputPhone); inputPhone.focus(); return; }
+    
+    goToStep(2);
+  });
+
+  inputEmail.addEventListener('keydown', e => { if (e.key === 'Enter') inputPhone.focus(); });
+  inputPhone.addEventListener('keydown', e => { if (e.key === 'Enter') (document.getElementById('btn-step1') as HTMLButtonElement).click(); });
+
+  // ── Step 2: cognitive ───────────────────────────────────────────────────
+  const choices     = document.querySelectorAll<HTMLButtonElement>('.choice-item');
+  const submitBtn   = document.getElementById('btn-step2') as HTMLButtonElement;
+  const inputMental = document.getElementById('input-mental') as HTMLInputElement;
+
+  choices.forEach(btn => {
+    btn.addEventListener('click', () => {
+      choices.forEach(c => c.classList.remove('selected'));
+      btn.classList.add('selected');
+      formData.cognitive = btn.dataset.value ?? '';
+
+      // Reveal submit button
+      submitBtn.classList.remove('opacity-0', 'pointer-events-none');
+      gsap.fromTo(submitBtn, { opacity: 0 }, { opacity: 1, duration: 0.4 });
+    });
+  });
+
+  inputMental.addEventListener('keydown', e => { 
+    if (e.key === 'Enter') submitBtn.click(); 
+  });
+
+  submitBtn.addEventListener('click', () => {
+    if (!formData.cognitive) return;
+    
+    formData.mental = inputMental.value.trim();
+    formData.timeMs = Date.now() - startTime;
+    formData.backspaces = backspaceCount;
+
+    // Send form data to PostFormFlow via custom event
+    document.dispatchEvent(new CustomEvent('viwra:form-complete', {
+      detail: {
+        name:      formData.name,
+        surname:   formData.surname,
+        email:     formData.email,
+        phone:     formData.phone,
+        cognitive: formData.cognitive,
+        mental:    formData.mental,
+        timeMs:    formData.timeMs,
+        backspace: formData.backspaces
+      },
+    }));
+  });
+
+  // ── Initial animation ────────────────────────────────────────────────────
+  gsap.fromTo(
+    '#protocol-section',
+    { opacity: 0 },
+    { opacity: 1, duration: 1.2, ease: 'power2.out', delay: 0.2 },
+  );
+</script>
+
+<style>
+  .protocol-step {
+    display: flex;
+    flex-direction: column;
+  }
+  .protocol-step.hidden {
+    display: none;
+  }
+</style>

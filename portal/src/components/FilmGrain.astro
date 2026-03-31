@@ -1,0 +1,49 @@
+---
+// FilmGrain.astro — Fixed CSS film grain overlay
+---
+
+<!-- SVG noise filter definition (hidden) -->
+<svg class="sr-only absolute" aria-hidden="true">
+  <defs>
+    <filter id="viwra-noise">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.72"
+        numOctaves="4"
+        stitchTiles="stitch"
+      />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+  </defs>
+</svg>
+
+<!-- The grain overlay itself -->
+<div class="film-grain" aria-hidden="true"></div>
+
+<style>
+  .film-grain {
+    position: fixed;
+    inset: -30%;          /* oversized so the shift animation doesn't show edges */
+    width: 160%;
+    height: 160%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.038;
+    filter: url(#viwra-noise);
+    animation: grain 0.22s steps(1) infinite;
+    will-change: transform;
+  }
+
+  @keyframes grain {
+    0%,  100% { transform: translate(0,    0); }
+    10%        { transform: translate(-3%,  -4%); }
+    20%        { transform: translate(4%,   3%); }
+    30%        { transform: translate(-2%,  5%); }
+    40%        { transform: translate(3%,  -2%); }
+    50%        { transform: translate(-4%,  4%); }
+    60%        { transform: translate(2%,  -3%); }
+    70%        { transform: translate(-3%,  2%); }
+    80%        { transform: translate(4%,  -4%); }
+    90%        { transform: translate(-2%,  3%); }
+  }
+</style>

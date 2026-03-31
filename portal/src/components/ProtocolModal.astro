@@ -1,0 +1,179 @@
+---
+// ProtocolModal.astro — Metodoloji overlay with live accelerometer visualization
+---
+
+<div
+  id="protocol-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Viwra Metodoloji"
+  class="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none"
+  style="opacity:0"
+>
+  <div class="absolute inset-0 bg-viwra-navy/95 backdrop-blur-sm"></div>
+
+  <div class="relative z-10 w-full max-w-sm mx-auto px-8">
+
+    <!-- Header -->
+    <p class="text-viwra-bone/20 text-[10px] tracking-[0.5em] uppercase mb-10 text-center">
+      Metodoloji — v1.04
+    </p>
+
+    <!-- Accelerometer canvas -->
+    <div class="mb-4 relative">
+      <canvas
+        id="accel-canvas"
+        class="w-full"
+        style="height:180px; display:block;"
+      ></canvas>
+
+      <!-- Channel labels -->
+      <div class="absolute top-0 left-0 right-0 flex justify-between text-[8px] tracking-widest"
+           style="opacity:0.2">
+        <span class="text-viwra-bone">X</span>
+        <span style="color:rgba(160,200,255);">Y</span>
+        <span style="color:rgba(200,150,255);">Z</span>
+      </div>
+    </div>
+
+    <!-- Live readings -->
+    <div class="flex justify-between text-[10px] tracking-widest mb-12" style="opacity:0.25">
+      <span>X: <span id="val-x" class="text-viwra-bone font-[100]">0.00</span></span>
+      <span>Y: <span id="val-y" style="color:rgba(160,200,255);" class="font-[100]">0.00</span></span>
+      <span>Z: <span id="val-z" style="color:rgba(200,150,255);" class="font-[100]">9.81</span></span>
+    </div>
+
+    <!-- Close -->
+    <div class="text-center">
+      <button
+        id="modal-close-btn"
+        class="text-viwra-bone/20 text-[10px] tracking-[0.4em] uppercase
+               hover:text-viwra-bone/50 transition-colors duration-500"
+      >
+        × kapat
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import gsap from 'gsap';
+
+  const modal    = document.getElementById('protocol-modal')!;
+  const closeBtn = document.getElementById('modal-close-btn')!;
+  const openLink = document.getElementById('protocol-link')!;
+  const canvas   = document.getElementById('accel-canvas') as HTMLCanvasElement;
+  const ctx      = canvas.getContext('2d')!;
+
+  const valX = document.getElementById('val-x')!;
+  const valY = document.getElementById('val-y')!;
+  const valZ = document.getElementById('val-z')!;
+
+  // ── Ring buffer for 3 channels ──────────────────────────────────────────
+  const BUF = 150;
+  const bX = new Float32Array(BUF);
+  const bY = new Float32Array(BUF);
+  const bZ = new Float32Array(BUF).fill(9.81);
+  let head = 0;
+  let fakeT = 0;
+  let useFake = true;
+  let rafId = 0;
+  let modalOpen = false;
+
+  const push = (x: number, y: number, z: number) => {
+    bX[head] = x; bY[head] = y; bZ[head] = z;
+    head = (head + 1) % BUF;
+  };
+
+  // ── Resize canvas to device pixels ─────────────────────────────────────
+  const resizeCanvas = () => {
+    const rect = canvas.getBoundingClientRect();
+    const dpr  = window.devicePixelRatio || 1;
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+  };
+
+  // ── Draw ────────────────────────────────────────────────────────────────
+  const drawLine = (buf: Float32Array, yCenter: number, color: string, scale: number, h: number) => {
+    const W = canvas.getBoundingClientRect().width;
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = 0.7;
+    // Baseline
+    ctx.strokeStyle = color.replace(/[\d.]+\)$/, '0.12)');
+    ctx.setLineDash([2, 5]);
+    ctx.beginPath(); ctx.moveTo(0, yCenter); ctx.lineTo(W, yCenter); ctx.stroke();
+    ctx.setLineDash([]);
+    // Signal
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    for (let i = 0; i < BUF; i++) {
+      const idx = (head + i) % BUF;
+      const x   = (i / BUF) * W;
+      const y   = yCenter - (buf[idx] / scale) * (h * 0.38);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  };
+
+  const draw = () => {
+    const W = canvas.getBoundingClientRect().width;
+    const H = 180;
+    ctx.clearRect(0, 0, W * (window.devicePixelRatio || 1), H * (window.devicePixelRatio || 1));
+
+    if (useFake) {
+      fakeT += 0.04;
+      push(
+        Math.sin(fakeT * 1.3) * 0.5 + Math.sin(fakeT * 3.1) * 0.15,
+        Math.cos(fakeT * 0.9) * 0.35,
+        9.81 + Math.sin(fakeT * 0.5) * 0.18,
+      );
+    }
+
+    const ch = H / 3;
+    drawLine(bX, ch * 0.5, 'rgba(244,242,226,0.7)', 2,  ch);
+    drawLine(bY, ch * 1.5, 'rgba(160,200,255,0.6)', 2,  ch);
+    drawLine(bZ, ch * 2.5, 'rgba(200,150,255,0.5)', 12, ch);
+
+    if (modalOpen) rafId = requestAnimationFrame(draw);
+  };
+
+  // ── Sensor ──────────────────────────────────────────────────────────────
+  const onMotion = (e: DeviceMotionEvent) => {
+    const a = e.accelerationIncludingGravity;
+    if (!a) return;
+    const x = a.x ?? 0, y = a.y ?? 0, z = a.z ?? 9.81;
+    useFake = false;
+    push(x, y, z);
+    valX.textContent = x.toFixed(2);
+    valY.textContent = y.toFixed(2);
+    valZ.textContent = z.toFixed(2);
+  };
+
+  // ── Open / Close ────────────────────────────────────────────────────────
+  const openModal = () => {
+    modalOpen = true;
+    modal.classList.remove('pointer-events-none');
+    gsap.to(modal, { opacity: 1, duration: 0.6, ease: 'power2.out' });
+    resizeCanvas();
+    window.addEventListener('devicemotion', onMotion);
+    rafId = requestAnimationFrame(draw);
+  };
+
+  const closeModal = () => {
+    modalOpen = false;
+    cancelAnimationFrame(rafId);
+    window.removeEventListener('devicemotion', onMotion);
+    gsap.to(modal, {
+      opacity: 0, duration: 0.5, ease: 'power2.in',
+      onComplete: () => modal.classList.add('pointer-events-none'),
+    });
+  };
+
+  openLink.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+</script>

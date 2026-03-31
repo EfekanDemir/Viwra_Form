@@ -1,0 +1,583 @@
+---
+// PostFormFlow.astro — Complete Flow: Calibration → Focus Test → Neural Analysis (Supabase) → Seal → Climax
+---
+
+<div
+  id="post-form-overlay"
+  class="fixed inset-0 z-[150] bg-viwra-navy flex items-center justify-center pointer-events-none"
+  style="opacity:0"
+>
+
+  <!-- ══ PHASE 1: Calibration ══════════════════════════════════════════ -->
+  <div id="phase-calibration" class="phase-panel text-center px-8 max-w-sm mx-auto w-full">
+    <div class="mini-rings mx-auto mb-12">
+      <span class="mring mring-outer"></span>
+      <span class="mring mring-mid"></span>
+      <span class="mring mring-inner"></span>
+    </div>
+    <p class="text-viwra-bone/30 text-[10px] tracking-[0.5em] uppercase mb-6">Kalibrasyon</p>
+    <p class="text-viwra-bone/60 text-sm font-extralight leading-loose tracking-wide mb-14">
+      Biyometrik doğrulama ve cihaz stabilitesi için<br />sensör senkronizasyonu gerekiyor.
+    </p>
+    <button id="btn-calibrate" class="continue-btn">
+      Protokolü Kalibre Et ve Başlat
+    </button>
+  </div>
+
+  <!-- ══ PHASE 2: Focus Test ════════════════════════════════════════════ -->
+  <div id="phase-focus" class="phase-panel hidden w-full flex-col items-center justify-center px-8">
+    <div
+      id="live-traffic"
+      class="absolute top-8 right-8 text-right text-viwra-bone text-[10px] tracking-wide leading-loose max-w-[180px]"
+      style="opacity:0.25"
+    >
+      <span id="traffic-count">—</span> aday şu an seninle beraber<br />rezonans testi altında.
+    </div>
+
+    <div class="relative mb-8">
+      <svg width="160" height="160" viewBox="0 0 160 160" class="-rotate-90">
+        <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(244,242,226,0.07)" stroke-width="1"/>
+        <circle
+          id="timer-arc"
+          cx="80" cy="80" r="70"
+          fill="none"
+          stroke="rgba(244,242,226,0.55)"
+          stroke-width="0.8"
+          stroke-linecap="round"
+        />
+      </svg>
+      <div class="absolute inset-0 flex items-center justify-center rotate-90">
+        <span id="timer-number" class="text-4xl font-[100] text-viwra-bone/80 tabular-nums">60</span>
+      </div>
+    </div>
+
+    <p class="text-viwra-bone/30 text-[10px] tracking-[0.4em] uppercase mb-1">Odak Protokolü Aktif</p>
+    <p id="sensor-hint" class="text-viwra-bone/20 text-xs font-extralight tracking-wide mb-10">
+      Sabit kal. Sekme değiştirme.
+    </p>
+
+    <div
+      id="touch-ring"
+      class="hidden w-28 h-28 rounded-full border border-viwra-bone/20 flex items-center justify-center
+             cursor-pointer select-none transition-colors duration-300 mb-6"
+      role="button"
+      aria-label="Parmağını bu halka üzerinde tut"
+    >
+      <span class="text-viwra-bone/30 text-[9px] tracking-widest text-center leading-loose">
+        PARMAĞINI<br/>BURADA<br/>TUT
+      </span>
+    </div>
+
+    <!-- Glitch Panel -->
+    <div
+      id="glitch-msg"
+      class="glitch-panel hidden absolute inset-0 flex items-center justify-center bg-viwra-navy/95 z-50 px-8"
+      aria-live="assertive"
+    >
+      <p
+        id="glitch-text"
+        class="glitch-text text-viwra-bone/90 text-xl font-extralight tracking-wide text-center leading-loose max-w-lg"
+        data-text="Protokol tutarsızlık saptadı. Zihinsel frekans eşleşmiyor. Sistem yeniden sanitize edilecek."
+      >
+        Protokol tutarsızlık saptadı.<br/><br/>Zihinsel frekans eşleşmiyor.<br/><br/>Sistem 5 saniye içinde yeniden sanitize edilecek.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══ PHASE 3: Neural Analysis & Supabase Save ══════════════════════ -->
+  <div id="phase-analysis" class="phase-panel hidden text-center px-8 max-w-sm mx-auto w-full">
+    <p class="text-viwra-bone/30 text-[10px] tracking-[0.5em] uppercase mb-14">Bilişsel Analiz</p>
+    <p id="analysis-msg" class="text-viwra-bone/70 text-base font-extralight tracking-wide min-h-[2rem]">
+      &nbsp;
+    </p>
+  </div>
+
+  <!-- ══ PHASE 4: Digital Seal (Success) ═══════════════════════════════ -->
+  <div id="phase-success" class="phase-panel hidden flex-col items-center justify-center w-full px-4">
+    <!-- The Seal Card -->
+    <div id="digital-seal" class="relative bg-viwra-navy border border-viwra-bone/10 px-8 py-10 w-full max-w-[320px] text-center overflow-hidden">
+      <!-- Decor background elements can be added here -->
+      <div class="mini-rings mx-auto mb-8 scale-75">
+        <span class="mring mring-outer"></span>
+        <span class="mring mring-mid"></span>
+        <span class="mring mring-inner"></span>
+      </div>
+      <p class="text-viwra-bone/30 text-[8px] tracking-[0.6em] uppercase mb-4">Viwra Protocol v1.04</p>
+      <p class="text-viwra-bone/90 text-2xl font-extralight tracking-widest mb-2"><span id="success-name">—</span></p>
+      <p class="text-viwra-bone/50 text-[10px] tracking-[0.4em] uppercase mb-6" id="candidate-number">V-00000</p>
+      
+      <p class="text-viwra-bone/40 text-[9px] font-extralight tracking-widest mb-4">
+        Biometric Sync: <span id="bio-result" class="text-viwra-bone/80">%96.4</span>
+      </p>
+      
+      <hr class="viwra-hr border-viwra-bone/20 my-6" />
+      <p class="text-viwra-bone/60 text-[10px] font-extralight tracking-widest uppercase">
+        Durum: Analiz Tamamlandı
+      </p>
+    </div>
+    
+    <!-- Actions -->
+    <div class="mt-8 flex flex-col gap-8 items-center w-full">
+      <button id="btn-download-seal" class="text-viwra-bone/50 hover:text-viwra-bone text-[10px] tracking-[0.4em] uppercase transition-colors duration-500">
+        [ Mührü İndir ]
+      </button>
+      <button id="btn-climax" class="continue-btn w-64">
+        Kapıyı Arala
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ PHASE 5: The Climax (852Hz Resonance) ═════════════════════════ -->
+  <div id="phase-climax" class="phase-panel hidden text-center w-full flex-col items-center justify-center">
+    <div class="mini-rings climax-rings mx-auto mb-16 scale-150">
+      <span class="mring mring-outer"></span>
+      <span class="mring mring-mid"></span>
+      <span class="mring mring-inner"></span>
+    </div>
+    <p class="text-viwra-bone/70 text-sm font-extralight tracking-widest leading-loose">
+      Frekans Senkronize Edildi.<br/>Beklemede Kal.
+    </p>
+  </div>
+
+</div>
+
+<!-- ══ Styles ════════════════════════════════════════════════════════════ -->
+<style>
+  .phase-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .phase-panel.hidden { display: none; }
+
+  /* Rings */
+  .mini-rings {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mring {
+    position: absolute;
+    border-radius: 50%;
+    border-style: solid;
+    border-color: #f4f2e2;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  .mring-outer  { width: 80px; height: 80px; border-width: 0.6px; animation: breathe-outer 6s ease-in-out infinite; }
+  .mring-mid    { width: 52px; height: 52px; border-width: 0.8px; animation: breathe-mid   5s ease-in-out infinite; animation-delay: -1.5s; }
+  .mring-inner  { width: 24px; height: 24px; border-width: 1px;   animation: breathe-inner 4s ease-in-out infinite; animation-delay: -0.8s; }
+
+  /* Climax Ripple */
+  .climax-rings .mring {
+    border-color: rgba(244,242,226, 0.6) !important;
+    animation-timing-function: linear !important;
+  }
+  .climax-rings .mring-outer { animation: climax-ripple 1.5s linear infinite !important; }
+  .climax-rings .mring-mid   { animation: climax-ripple 1.5s linear infinite 0.5s !important; }
+  .climax-rings .mring-inner { animation: climax-ripple 1.5s linear infinite 1.0s !important; }
+
+  @keyframes breathe-outer  { 0%,100%{ transform:scale(1);    opacity:.22; } 50%{ transform:scale(1.07); opacity:.50; } }
+  @keyframes breathe-mid    { 0%,100%{ transform:scale(1);    opacity:.38; } 50%{ transform:scale(1.08); opacity:.72; } }
+  @keyframes breathe-inner  { 0%,100%{ transform:scale(1);    opacity:.55; } 50%{ transform:scale(1.10); opacity:.95; } }
+  
+  @keyframes climax-ripple {
+    0%   { transform:scale(0.3); opacity: 1; border-width: 1.5px; }
+    100% { transform:scale(1.8); opacity: 0; border-width: 0.2px; }
+  }
+
+  /* Glitch text */
+  .glitch-text { position: relative; }
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    white-space: pre-wrap;
+  }
+  .glitch-text::before {
+    color: rgba(255,100,100,0.7);
+    clip-path: inset(30% 0 50% 0);
+    animation: glitch-before 0.35s steps(2) infinite;
+  }
+  .glitch-text::after {
+    color: rgba(100,160,255,0.7);
+    clip-path: inset(55% 0 15% 0);
+    animation: glitch-after 0.35s steps(2) infinite 0.1s;
+  }
+  @keyframes glitch-before {
+    0%   { transform: translate(-3px, 0); }
+    50%  { transform: translate(3px, 1px); clip-path: inset(10% 0 70% 0); }
+    100% { transform: translate(-2px, 0); }
+  }
+  @keyframes glitch-after {
+    0%   { transform: translate(3px, 0); }
+    50%  { transform: translate(-3px, -1px); clip-path: inset(65% 0 5% 0); }
+    100% { transform: translate(2px, 0); }
+  }
+  @keyframes glitch-shake {
+    0%,100% { transform: none; }
+    20%  { transform: translate(-2px, 0); }
+    40%  { transform: translate(2px, 0); }
+    60%  { transform: translate(-1px, 0); }
+    80%  { transform: translate(1px,  0); }
+  }
+  .glitch-panel { animation: glitch-shake 0.15s steps(1) infinite; }
+  .type-cursor { animation: cur-blink 0.7s steps(1) infinite; }
+  @keyframes cur-blink { 0%,100%{ opacity:1; } 50%{ opacity:0; } }
+</style>
+
+<!-- ══ Script ════════════════════════════════════════════════════════════ -->
+<script>
+  import gsap from 'gsap';
+  import { supabase } from '../lib/supabase';
+  import html2canvas from 'html2canvas';
+
+  // State
+  let userName          = '';
+  let userEmail         = '';
+  let userPhone         = '';
+  let userCognitive     = '';
+  let userMental        = '';
+  let formTimeMs        = 0;
+  let backspaceCnt      = 0;
+  let bioScore          = 0;
+  let realPresenceCount = 1; // Kendimiz
+
+  // ── Realtime Presence ───────────────────────────────────────────
+  const room = supabase.channel('viwra_focus_room', {
+    config: { presence: { key: 'tester' } },
+  });
+
+  room.on('presence', { event: 'sync' }, () => {
+    const state = room.presenceState();
+    realPresenceCount = Object.keys(state).length;
+  }).subscribe(async (status) => {
+    if (status === 'SUBSCRIBED') {
+      await room.track({ joined_at: Date.now() });
+    }
+  });
+  
+  // TESTING ONLY: Temporarily set timeLeft to 2 seconds instead of 60.
+  let timeLeft          = 2;
+  let sensorMode: 'motion' | 'touch' = 'touch';
+  let timerInterval: ReturnType<typeof setInterval> | null = null;
+  let fluctInterval:  ReturnType<typeof setInterval> | null = null;
+  let lastAccelMag      = 0;
+  let motionStart: number | null = null;
+  const MOTION_THRESH   = 1.4;
+  const MOTION_MS       = 400;
+  const CIRC            = 2 * Math.PI * 70;
+
+  // DOM
+  const overlay     = document.getElementById('post-form-overlay')!;
+  const pCalib      = document.getElementById('phase-calibration')!;
+  const pFocus      = document.getElementById('phase-focus')!;
+  const pAnalysis   = document.getElementById('phase-analysis')!;
+  const pSuccess    = document.getElementById('phase-success')!;
+  const pClimax     = document.getElementById('phase-climax')!;
+  
+  const timerArc    = document.getElementById('timer-arc') as SVGCircleElement;
+  const timerNum    = document.getElementById('timer-number')!;
+  const touchRing   = document.getElementById('touch-ring')!;
+  const trafficSpan = document.getElementById('traffic-count')!;
+  const analysisMsg = document.getElementById('analysis-msg')!;
+  
+  const glitchPanel = document.getElementById('glitch-msg')!;
+  const glitchTextEl= document.getElementById('glitch-text')!;
+  
+  const successName = document.getElementById('success-name')!;
+  const candNumEl   = document.getElementById('candidate-number')!;
+  const bioResultEl = document.getElementById('bio-result')!;
+
+  timerArc.style.strokeDasharray  = String(CIRC);
+  timerArc.style.strokeDashoffset = '0';
+
+  // Transitions
+  const switchPhase = (from: HTMLElement, to: HTMLElement, dir: 1 | -1 = 1) => {
+    gsap.to(from, {
+      opacity: 0, y: -22 * dir, duration: 0.38, ease: 'power2.in',
+      onComplete() {
+        from.classList.add('hidden');
+        to.classList.remove('hidden');
+        gsap.fromTo(to,
+          { opacity: 0, y: 22 * dir },
+          { opacity: 1, y: 0, duration: 0.55, ease: 'power3.out' },
+        );
+      },
+    });
+  };
+
+  document.addEventListener('viwra:form-complete', (e: Event) => {
+    const d = (e as CustomEvent).detail;
+    userName      = d.name ?? '';
+    userEmail     = d.email ?? '';
+    userPhone     = d.phone ?? '';
+    userCognitive = d.cognitive ?? '';
+    userMental    = d.mental ?? '';
+    formTimeMs    = d.timeMs ?? 0;
+    backspaceCnt  = d.backspace ?? 0;
+    
+    overlay.classList.remove('pointer-events-none');
+    gsap.to(overlay, { opacity: 1, duration: 0.8, ease: 'power2.out' });
+  });
+
+  document.getElementById('btn-calibrate')?.addEventListener('click', async () => {
+    sensorMode = await requestSensors();
+    switchPhase(pCalib, pFocus);
+    setTimeout(startFocusTest, 750);
+  });
+
+  const requestSensors = async (): Promise<'motion' | 'touch'> => {
+    const dme = (DeviceMotionEvent as any);
+    if (typeof dme?.requestPermission === 'function') {
+      try { return (await dme.requestPermission()) === 'granted' ? 'motion' : 'touch'; } catch { return 'touch'; }
+    }
+    return new Promise(res => {
+      const hd = () => { window.removeEventListener('devicemotion', hd); res('motion'); };
+      window.addEventListener('devicemotion', hd);
+      setTimeout(() => { window.removeEventListener('devicemotion', hd); res('touch'); }, 400);
+    });
+  };
+
+  const updateArc = () => {
+    const progress = timeLeft / 60;
+    timerArc.style.strokeDashoffset = String(CIRC * (1 - progress));
+    timerNum.textContent = String(timeLeft);
+  };
+
+  const startFocusTest = () => {
+    timeLeft = 60; updateArc(); startTraffic();
+    document.addEventListener('visibilitychange', onVisChange);
+    if (sensorMode === 'motion') window.addEventListener('devicemotion', onMotion);
+    else setupTouchFallback();
+    tick();
+  };
+
+  const tick = () => {
+    timerInterval = setInterval(() => {
+      timeLeft--; updateArc();
+      if (timeLeft <= 0) { clearInterval(timerInterval!); onFocusPass(); }
+    }, 1000);
+  };
+
+  const resetFocus = () => {
+    clearInterval(timerInterval!); timeLeft = 60; updateArc();
+    if ('vibrate' in navigator) navigator.vibrate([50, 30, 50]);
+    showGlitch("Protokol tutarsızlık saptadı.<br/><br/>Zihinsel frekans eşleşmiyor.<br/><br/>Sistem 5 saniye içinde yeniden sanitize edilecek.");
+  };
+
+  const showGlitch = (text: string) => {
+    glitchTextEl.innerHTML = text;
+    glitchTextEl.setAttribute('data-text', text.replace(/<br\/>/g, ' '));
+    glitchPanel.classList.remove('hidden');
+    gsap.set(glitchPanel, { opacity: 1 });
+    
+    let n = 0;
+    const id = setInterval(() => {
+      glitchPanel.style.opacity = n++ % 2 === 0 ? '1' : String(0.3 + Math.random() * 0.5);
+      if (n > 16) { clearInterval(id); glitchPanel.style.opacity = '1'; }
+    }, 70);
+    
+    setTimeout(() => {
+      gsap.to(glitchPanel, {
+        opacity: 0, duration: 0.5,
+        onComplete: () => { glitchPanel.classList.add('hidden'); tick(); },
+      });
+    }, 5000);
+  };
+
+  const onVisChange = () => { if (document.hidden) resetFocus(); };
+  const onMotion = (e: DeviceMotionEvent) => {
+    const a = e.accelerationIncludingGravity; if (!a || a.x === null) return;
+    const mag = Math.sqrt((a.x??0)**2 + (a.y??0)**2 + (a.z??0)**2);
+    const delta = Math.abs(mag - lastAccelMag); lastAccelMag = mag;
+    if (delta > MOTION_THRESH) {
+      if (!motionStart) motionStart = Date.now();
+      else if (Date.now() - motionStart > MOTION_MS) { motionStart = null; resetFocus(); }
+    } else { motionStart = null; }
+  };
+
+  const setupTouchFallback = () => {
+    touchRing.classList.remove('hidden');
+    document.getElementById('sensor-hint')!.textContent = 'Parmağını halka üzerinde sabit tut.';
+    let held = false;
+    const hold = () => { held = true; touchRing.style.borderColor = 'rgba(244,242,226,0.55)'; };
+    const release = () => { if (!held) return; held = false; touchRing.style.borderColor = ''; resetFocus(); };
+    touchRing.addEventListener('touchstart', hold, { passive: true });
+    touchRing.addEventListener('mousedown', hold);
+    touchRing.addEventListener('touchend', release, { passive: true });
+    touchRing.addEventListener('mouseup', release);
+    touchRing.addEventListener('mouseleave', release);
+  };
+
+  const getDeterministicTraffic = () => {
+    const d = new Date();
+    const h = d.getHours();
+    
+    let baseMin = 1, baseMax = 4;
+    if (h >= 12 && h < 22) { baseMin = 4; baseMax = 9; }
+    else if (h >= 2 && h < 7) { baseMin = 0; baseMax = 2; }
+    
+    // ZAMAN BAZLI SENKRONİZASYON (DETERMİNİSTİK DALGA)
+    const timeMs = d.getTime();
+    const wave = (Math.cos(timeMs / 25000) + 1) / 2; // 0 ile 1 arasında yumuşak gidiş geliş
+    
+    const illusion = Math.floor(baseMin + wave * (baseMax - baseMin + 1));
+    const extraReal = Math.max(0, realPresenceCount - 1); // Biz hariç sitedeki gerçek kişiler
+    
+    const hypeMultiplier = extraReal * 3; // Her gerçek aday, miti (efsaneyi) büyütür
+    
+    return Math.max(0, illusion + hypeMultiplier);
+  };
+
+  const startTraffic = () => {
+    let lastCount = -1;
+    const update = () => {
+      const current = getDeterministicTraffic();
+      if (current !== lastCount) {
+        lastCount = current;
+        gsap.to(trafficSpan, { 
+          opacity: 0, duration: 0.25, 
+          onComplete: () => { 
+            trafficSpan.textContent = String(current); 
+            gsap.to(trafficSpan, { opacity: 1, duration: 0.25 }); 
+          }
+        });
+      }
+    };
+    
+    update();
+    fluctInterval = setInterval(update, 2000); // Her 2 saniyede bir global zamana bak
+  };
+
+  const typeWrite = (el: HTMLElement, text: string): Promise<void> =>
+    new Promise(res => {
+      el.innerHTML = '';
+      const c = document.createElement('span'); c.className = 'type-cursor'; c.textContent = '|';
+      el.appendChild(c); let i = 0;
+      const next = () => {
+        if (i < text.length) { c.insertAdjacentText('beforebegin', text[i++]); setTimeout(next, 38 + Math.random() * 22); }
+        else { setTimeout(() => { c.remove(); res(); }, 700); }
+      }; next();
+    });
+
+  const onFocusPass = () => {
+    cleanup(); switchPhase(pFocus, pAnalysis); setTimeout(runAnalysis, 700);
+  };
+
+  const calculateBioScore = () => {
+    let score = 98.4;
+    score -= (backspaceCnt * 0.35); // Kararsızlık Cezası
+    
+    const timeSecs = formTimeMs / 1000;
+    if (timeSecs > 45) score -= ((timeSecs - 45) * 0.08); // Yavaşlık Cezası
+    
+    score += (-0.5 + Math.random() * 1.7); // Biyometrik nabız ve organik sapma simülasyonu
+    return Math.max(0, Math.min(99.99, score)).toFixed(2);
+  };
+  const generateCandidateNo = () => {
+    const d = new Date();
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const r = Math.floor(Math.random() * 10);
+    return `V-${h}${m}${r}`;
+  };
+
+  const runAnalysis = async () => {
+    bioScore = parseFloat(calculateBioScore());
+    const msgs = ['Biyometrik gecikme analiz ediliyor...', 'Cihaz stabilitesi onaylanıyor...', 'Odak derinliği hesaplanıyor...'];
+    
+    for (const msg of msgs) {
+      await typeWrite(analysisMsg, msg); await new Promise(r => setTimeout(r, 400));
+      await new Promise<void>(r => gsap.to(analysisMsg, { opacity: 0, duration: 0.3, onComplete: r })); gsap.set(analysisMsg, { opacity: 1 });
+    }
+
+    // Supabase Insert & Sync
+    await typeWrite(analysisMsg, 'Veri ağına bağlanılıyor...');
+    
+    try {
+      const waitlistInsert = supabase.from('Viwra_Waitlist').insert([{
+        full_name: userName,
+        email: userEmail,
+        phone: userPhone,
+        biometric_score: bioScore,
+        cognitive_state: userCognitive,
+        mental_status: userMental,
+        form_fill_time_ms: formTimeMs,
+        backspace_count: backspaceCnt,
+        is_altruistic: (userCognitive === 'Kesinlikle dikkat ederim' || userCognitive === 'Elimden geleni yaparım')
+      }]);
+
+      // Ensure minimum 1.5s visual for sync text even if db is instant
+      const [res] = await Promise.all([waitlistInsert, new Promise(r => setTimeout(r, 1500))]);
+
+      if (res.error) throw res.error;
+
+      await new Promise<void>(r => gsap.to(analysisMsg, { opacity: 0, duration: 0.3, onComplete: r }));
+      
+      // Setup HTML Card
+      successName.textContent = userName || 'Katılımcı';
+      candNumEl.textContent   = generateCandidateNo();
+      bioResultEl.textContent = `%${bioScore}`;
+      
+      switchPhase(pAnalysis, pSuccess);
+
+    } catch (err) {
+      console.error("[Viwra DB]:", err);
+      // Fallback glitched retry
+      switchPhase(pAnalysis, pFocus, -1);
+      setTimeout(() => { showGlitch('Sistem yoğun, rezonans kurulamadı. Tekrar dene.') }, 500);
+      timeLeft = 2; // Rewind
+    }
+  };
+
+  const cleanup = () => {
+    clearInterval(timerInterval!); clearInterval(fluctInterval!);
+    document.removeEventListener('visibilitychange', onVisChange);
+    window.removeEventListener('devicemotion', onMotion);
+  };
+
+  // Seal Download
+  document.getElementById('btn-download-seal')?.addEventListener('click', async () => {
+    const seal = document.getElementById('digital-seal')!;
+    const btn = document.getElementById('btn-download-seal')!;
+    const origText = btn.textContent;
+    btn.textContent = '[ HAZIRLANIYOR... ]';
+    try {
+      const canvas = await html2canvas(seal, { backgroundColor: '#0a062b', scale: 2 });
+      const dlLink = document.createElement('a');
+      dlLink.download = `Viwra_FirstCircle_${candNumEl.textContent}.png`;
+      dlLink.href = canvas.toDataURL('image/png');
+      dlLink.click();
+      btn.textContent = '[ İNDİRİLDİ ]';
+    } catch (e) { btn.textContent = '[ HATA OLUŞTU ]'; }
+    setTimeout(() => { btn.textContent = origText; }, 3000);
+  });
+
+  // Climax 852Hz
+  document.getElementById('btn-climax')?.addEventListener('click', () => {
+    // 1. Audio Resonance
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(852, ctx.currentTime);
+    
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 3);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+
+    // 2. Hide & Reveal Final State
+    switchPhase(pSuccess, pClimax);
+  });
+</script>

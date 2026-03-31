@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── No scrollbar ─────────────────────────────────────────────────── */
+@layer base {
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-viwra-navy text-viwra-bone font-sans antialiased overflow-x-hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: rgba(244, 242, 226, 0.12);
+  }
+}
+
+/* ── Protocol input (underline-only) ──────────────────────────────── */
+@layer components {
+  .protocol-input {
+    @apply w-full bg-transparent text-viwra-bone text-xl text-center
+           font-extralight tracking-wider
+           border-0 border-b border-viwra-bone/20
+           py-4 focus:outline-none
+           placeholder:text-viwra-bone/25
+           transition-colors duration-500;
+  }
+  .protocol-input:focus {
+    @apply border-viwra-bone/70;
+  }
+
+  /* Choice buttons for cognitive step */
+  .choice-item {
+    @apply flex items-center gap-4 w-full text-left py-3
+           text-viwra-bone/45 font-extralight text-base tracking-wide
+           transition-all duration-300 cursor-pointer select-none;
+  }
+  .choice-item:hover {
+    @apply text-viwra-bone/80;
+  }
+  .choice-item.selected {
+    @apply text-viwra-bone;
+  }
+  .choice-item .choice-marker {
+    @apply text-xs tracking-widest opacity-0 transition-opacity duration-300;
+  }
+  .choice-item.selected .choice-marker {
+    @apply opacity-100;
+  }
+
+  /* Minimal continue button */
+  .continue-btn {
+    @apply text-xs tracking-[0.3em] uppercase text-viwra-bone/35
+           border-b border-viwra-bone/15 pb-px
+           hover:text-viwra-bone/70 hover:border-viwra-bone/35
+           transition-all duration-500 cursor-pointer
+           bg-transparent;
+  }
+
+  /* Step dots */
+  .step-dot {
+    @apply w-1 h-1 rounded-full bg-viwra-bone/25 transition-all duration-500;
+  }
+  .step-dot.active {
+    @apply bg-viwra-bone/80 scale-125;
+  }
+
+  /* Thin horizontal rule */
+  .viwra-hr {
+    @apply border-0 h-px bg-viwra-bone/15 w-16 mx-auto;
+  }
+}

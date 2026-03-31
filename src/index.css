@@ -1,0 +1,242 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-viwra-navy: #0a062b;
+  --color-viwra-bone: #f4f2e2;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+}
+
+body {
+  background-color: var(--color-viwra-navy);
+  color: var(--color-viwra-bone);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar for a cleaner look */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* =============================================
+   GLOBAL PLACEHOLDER FIX
+   ============================================= */
+::placeholder {
+  color: rgba(244, 242, 226, 0.45);
+}
+:-ms-input-placeholder {
+  color: rgba(244, 242, 226, 0.45);
+}
+
+/* =============================================
+   NOISE OVERLAY
+   ============================================= */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* =============================================
+   ORGANIC RIPPLE
+   ============================================= */
+@keyframes organic-ripple {
+  0% { transform: scale(0.5); opacity: 0; border-width: 1px; }
+  30% { opacity: 0.6; border-width: 1.5px; }
+  100% { transform: scale(2.5); opacity: 0; border-width: 0px; }
+}
+
+.animate-organic-ripple {
+  animation: organic-ripple 6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+}
+
+/* =============================================
+   DEEP BREATHING (Scene 4)
+   ============================================= */
+@keyframes deep-breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.animate-deep-breathe {
+  animation: deep-breathe 4s ease-in-out infinite;
+}
+
+/* =============================================
+   SCROLL HINT BOUNCE (Scene 1)
+   ============================================= */
+@keyframes scroll-hint-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 0.9;
+  }
+}
+
+.animate-scroll-hint {
+  animation: scroll-hint-bounce 2s ease-in-out infinite;
+}
+
+/* =============================================
+   SHAKE — Validasyon Hatası
+   ============================================= */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-6px); }
+  30%       { transform: translateX(5px); }
+  45%       { transform: translateX(-4px); }
+  60%       { transform: translateX(3px); }
+  75%       { transform: translateX(-2px); }
+  90%       { transform: translateX(1px); }
+}
+
+.shake {
+  animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* =============================================
+   ENTER HINT — Klavye İpucu
+   ============================================= */
+@keyframes enter-hint-fade {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.7; }
+}
+
+.enter-hint {
+  animation: enter-hint-fade 2.5s ease-in-out infinite;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* =============================================
+   KAPIYI ARALA — Buton Pulse
+   ============================================= */
+@keyframes btn-pulse {
+  0%, 100% { opacity: 0.75; box-shadow: 0 0 0 0 rgba(244, 242, 226, 0); }
+  50%       { opacity: 1;    box-shadow: 0 0 18px 2px rgba(244, 242, 226, 0.08); }
+}
+
+.animate-btn-pulse {
+  animation: btn-pulse 3s ease-in-out infinite;
+}
+
+/* =============================================
+   SMOOTH INPUT UNDERLINE
+   ============================================= */
+.input-underline {
+  position: relative;
+}
+.input-underline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background-color: var(--color-viwra-bone);
+  transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1), left 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease, box-shadow 0.4s ease, background-color 0.3s ease;
+  opacity: 0.25;
+}
+
+/* Focused */
+.input-underline:focus-within::after {
+  width: 100%;
+  left: 0;
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(244, 242, 226, 0.4);
+}
+
+/* Has value */
+.input-underline.has-value::after {
+  width: 100%;
+  left: 0;
+  opacity: 0.55;
+}
+
+/* Error state */
+.input-underline.has-error::after {
+  width: 100%;
+  left: 0;
+  opacity: 0.8;
+  background-color: rgba(248, 113, 113, 0.7);
+  box-shadow: 0 0 10px rgba(248, 113, 113, 0.25);
+}
+
+/* Subtle input text animations */
+.input-underline input, .input-underline select {
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.input-underline:focus-within input, .input-underline:focus-within select {
+  transform: translateY(-4px);
+  text-shadow: 0 0 15px rgba(244, 242, 226, 0.3);
+}
+
+.input-underline.has-value input, .input-underline.has-value select {
+  letter-spacing: 0.05em;
+}
+
+/* =============================================
+   CUSTOM SELECT DROPDOWN
+   ============================================= */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23f4f2e2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7em top 50%;
+  background-size: 0.65em auto;
+}
+
+/* =============================================
+   STEP DOTS — Adım Göstergesi
+   ============================================= */
+.step-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.step-dot.active {
+  background-color: rgba(244, 242, 226, 0.9);
+  transform: scale(1.4);
+}
+
+.step-dot.inactive {
+  background-color: rgba(244, 242, 226, 0.2);
+}
+
+/* =============================================
+   LOADING SPINNER
+   ============================================= */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.spin-slow {
+  animation: spin-slow 1.5s linear infinite;
+}

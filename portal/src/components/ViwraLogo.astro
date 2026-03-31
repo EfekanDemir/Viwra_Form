@@ -1,0 +1,75 @@
+---
+// ViwraLogo.astro — 3 concentric breathing rings
+---
+
+<div class="viwra-logo" role="img" aria-label="Viwra logo">
+  <!-- Actual logo image -->
+  <img src="/favicon.svg" alt="Viwra Logo" class="absolute z-10 w-[80px] h-[80px] object-contain drop-shadow-[0_0_15px_rgba(244,242,226,0.4)]" />
+  
+  <!-- Outer ring — slowest breath -->
+  <span class="ring ring-outer z-0"></span>
+  <!-- Middle ring -->
+  <span class="ring ring-mid z-0"></span>
+  <!-- Inner ring — fastest breath -->
+  <span class="ring ring-inner z-0"></span>
+</div>
+
+<style>
+  .viwra-logo {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    border-style: solid;
+    border-color: #f4f2e2;
+  }
+
+  /* Outer ring: 200px */
+  .ring-outer {
+    width: 200px;
+    height: 200px;
+    border-width: 0.6px;
+    opacity: 0.22;
+    animation: breathe-outer 6s ease-in-out infinite;
+  }
+
+  /* Middle ring: 128px */
+  .ring-mid {
+    width: 128px;
+    height: 128px;
+    border-width: 0.8px;
+    opacity: 0.38;
+    animation: breathe-mid 5s ease-in-out infinite;
+    animation-delay: -1.5s;
+  }
+
+  /* Inner ring: 60px */
+  .ring-inner {
+    width: 60px;
+    height: 60px;
+    border-width: 1px;
+    opacity: 0.55;
+    animation: breathe-inner 4s ease-in-out infinite;
+    animation-delay: -0.8s;
+  }
+
+  @keyframes breathe-outer {
+    0%, 100% { transform: scale(1);    opacity: 0.22; }
+    50%       { transform: scale(1.07); opacity: 0.50; }
+  }
+  @keyframes breathe-mid {
+    0%, 100% { transform: scale(1);    opacity: 0.38; }
+    50%       { transform: scale(1.08); opacity: 0.72; }
+  }
+  @keyframes breathe-inner {
+    0%, 100% { transform: scale(1);    opacity: 0.55; }
+    50%       { transform: scale(1.10); opacity: 0.95; }
+  }
+</style>
