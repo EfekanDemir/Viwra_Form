@@ -9,6 +9,8 @@ try {
   execSync('npm run build', { stdio: 'inherit' });
 
   console.log('\n[2/4] Odak Formu Uretiliyor (Astro Portal)...');
+  console.log('      (Astro bagimliliklari Cloudflare uzerine kuruluyor...)');
+  execSync('npm install', { cwd: './portal', stdio: 'inherit' });
   execSync('npm run build', { cwd: './portal', stdio: 'inherit' });
 
   console.log('\n[3/4] Form Dosyalari Ana Klasorle Birlestiriliyor...');
