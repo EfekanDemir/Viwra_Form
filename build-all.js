@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { cpSync, rmSync, existsSync } from 'fs';
+import { cpSync, rmSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 console.log('--- VIWRA CLOUDFLARE BUILDER ---');
@@ -11,6 +11,15 @@ try {
   console.log('\n[2/4] Odak Formu Uretiliyor (Astro Portal)...');
   console.log('      (Astro bagimliliklari Cloudflare uzerine kuruluyor...)');
   execSync('npm install', { cwd: './portal', stdio: 'inherit' });
+  
+  if (process.env.VITE_SUPABASE_URL && process.env.VITE_SUPABASE_ANON_KEY) {
+      console.log('      (Supabase degiskenleri Astro formatina aktariliyor...)');
+      const envContent = `PUBLIC_SUPABASE_URL=${process.env.VITE_SUPABASE_URL}\nPUBLIC_SUPABASE_ANON_KEY=${process.env.VITE_SUPABASE_ANON_KEY}`;
+      writeFileSync(join(process.cwd(), 'portal', '.env'), envContent);
+  } else {
+      console.log('      [!] UYARI: VITE_SUPABASE_URL veya ANON_KEY eksik! Lutfen Cloudflare cevre degiskenlerini kontrol edin.');
+  }
+
   execSync('npm run build', { cwd: './portal', stdio: 'inherit' });
 
   console.log('\n[3/4] Form Dosyalari Ana Klasorle Birlestiriliyor...');
