@@ -472,14 +472,20 @@
   };
 
   const calculateBioScore = () => {
-    let score = 98.4;
-    score -= (backspaceCnt * 0.35); // Kararsızlık Cezası
+    let score = 99.4;
     
+    // Ağır Kararsızlık Cezası
+    score -= (backspaceCnt * 1.2); 
+    
+    // Yavaşlık Cezası (30 saniye üstü formu yavaş dolduranlar puan kaybeder)
     const timeSecs = formTimeMs / 1000;
-    if (timeSecs > 45) score -= ((timeSecs - 45) * 0.08); // Yavaşlık Cezası
+    if (timeSecs > 30) score -= ((timeSecs - 30) * 0.25);
     
-    score += (-0.5 + Math.random() * 1.7); // Biyometrik nabız ve organik sapma simülasyonu
-    return Math.max(0, Math.min(99.99, score)).toFixed(2);
+    // Rastgele organik sapma simülasyonu
+    score += (-0.3 + Math.random() * 0.8);
+    
+    // En düşük 90.00'a sabitlenir, 99.99'u geçemez
+    return Math.max(90.00, Math.min(99.99, score)).toFixed(2);
   };
   const generateCandidateNo = () => {
     const d = new Date();

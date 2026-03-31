@@ -29,10 +29,10 @@
 /* ── Protocol input (underline-only) ──────────────────────────────── */
 @layer components {
   .protocol-input {
-    @apply w-full bg-transparent text-viwra-bone text-xl text-center
+    @apply w-full bg-transparent text-viwra-bone text-base md:text-xl text-center
            font-extralight tracking-wider
            border-0 border-b border-viwra-bone/20
-           py-4 focus:outline-none
+           py-3 md:py-4 focus:outline-none
            placeholder:text-viwra-bone/25
            transition-colors duration-500;
   }
@@ -42,8 +42,8 @@
 
   /* Choice buttons for cognitive step */
   .choice-item {
-    @apply flex items-center gap-4 w-full text-left py-3
-           text-viwra-bone/45 font-extralight text-base tracking-wide
+    @apply flex items-center gap-3 md:gap-4 w-full text-left py-2 md:py-3
+           text-viwra-bone/45 font-extralight text-sm md:text-base tracking-wide
            transition-all duration-300 cursor-pointer select-none;
   }
   .choice-item:hover {
