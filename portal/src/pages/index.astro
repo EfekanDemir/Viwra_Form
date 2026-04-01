@@ -60,6 +60,20 @@ import '../styles/global.css';
       <p class="transition-sub text-viwra-bone/40 text-sm font-extralight tracking-widest leading-loose opacity-0">
         Bu bir kayıt formu değil,<br />bir uygunluk testidir.
       </p>
+
+      <!-- Viwra description -->
+      <div class="transition-desc opacity-0 mt-12">
+        <p class="text-viwra-bone/55 text-[13px] font-extralight leading-[2.1] tracking-wider max-w-xs mx-auto">
+          <span class="text-viwra-bone/80 tracking-widest">Viwra</span>, zor anlarda yanında
+          olan bir yapay zeka eşliğidir. Sesini ve biyometrik verini okuyarak o ana özel
+          bir deneyim üretir. Karakterleri ve yaşanmışlıkları örtüşen insanların
+          —&nbsp;tesadüfen değil, bir seçim sonucu —&nbsp;birbirini bulduğu
+          bir <span class="text-viwra-bone/80">yakın çevre</span>.
+        </p>
+        <p class="text-viwra-bone/25 text-[9px] tracking-[0.45em] uppercase mt-8">
+          Aşağıdaki formu tamamlayarak uygunluk sürecini başlat.
+        </p>
+      </div>
     </div>
   </section>
 
@@ -101,6 +115,7 @@ import '../styles/global.css';
   gsap.set('.transition-title',  { autoAlpha: 0, y: 16 });
   gsap.set('.transition-hr',     { scaleX: 0 });
   gsap.set('.transition-sub',    { autoAlpha: 0 });
+  gsap.set('.transition-desc',   { autoAlpha: 0, y: 14 });
 
   // ── 1. Hero entry animations ────────────────────────────────────────────
   const heroTl = gsap.timeline({ delay: 0.4 });
@@ -146,5 +161,6 @@ import '../styles/global.css';
     .to('.transition-label', { autoAlpha: 1, duration: 0.8 })
     .to('.transition-title', { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power3.out' }, '-=0.3')
     .to('.transition-hr',    { scaleX: 1,    duration: 0.8, ease: 'power2.inOut' }, '-=0.4')
-    .to('.transition-sub',   { autoAlpha: 1, duration: 0.9 }, '-=0.3');
+    .to('.transition-sub',   { autoAlpha: 1, duration: 0.9 }, '-=0.3')
+    .to('.transition-desc',  { autoAlpha: 1, y: 0, duration: 1.1, ease: 'power3.out' }, '-=0.4');
 </script>
