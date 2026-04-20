@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viwra — Admin Panel</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #06031b;
+      color: #E6E6E6;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #0a062b;
+      border: 1px solid #2a1f6e;
+      border-left: 3px solid #6d5fe6;
+      max-width: 580px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    .header {
+      border-bottom: 1px dotted #2a1f6e;
+      padding-bottom: 18px;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      color: #9b8ff0;
+      text-transform: uppercase;
+    }
+
+    .header p {
+      font-size: 11px;
+      color: #555;
+      margin-top: 6px;
+      letter-spacing: 0.1em;
+    }
+
+    label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      background: #06031b;
+      border: 1px solid #2a1f6e;
+      color: #E6E6E6;
+      font-family: inherit;
+      font-size: 13px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 24px;
+    }
+
+    input[type="password"]:focus {
+      border-color: #6d5fe6;
+    }
+
+    .btn {
+      width: 100%;
+      background: #E6E6E6;
+      color: #06031b;
+      border: none;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      padding: 16px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #fff;
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn.loading {
+      background: #333;
+      color: #888;
+    }
+
+    .log {
+      margin-top: 28px;
+      background: #04020f;
+      border: 1px solid #1a1040;
+      padding: 18px;
+      font-size: 11px;
+      line-height: 1.8;
+      min-height: 80px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .log .line { display: block; }
+    .log .success { color: #4ade80; }
+    .log .error   { color: #f87171; }
+    .log .info    { color: #6d5fe6; }
+    .log .muted   { color: #555; }
+
+    .summary {
+      margin-top: 16px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .stat {
+      flex: 1;
+      background: #04020f;
+      border: 1px solid #1a1040;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat .val {
+      font-size: 28px;
+      font-weight: 700;
+      color: #9b8ff0;
+    }
+
+    .stat .key {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      color: #555;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .stat.fail .val { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>⬡ Viwra — Broadcast Console</h1>
+      <p>// Tüm pending kayıtlara davet maili gönder</p>
+    </div>
+
+    <label for="secret">CRON_SECRET</label>
+    <input type="password" id="secret" placeholder="••••••••••••••••" autocomplete="off" />
+
+    <button class="btn" id="sendBtn" onclick="sendBroadcast()">
+      [ DAVET MAİLİ GÖNDER ]
+    </button>
+
+    <div class="summary" id="summary" style="display:none;">
+      <div class="stat">
+        <div class="val" id="statSent">0</div>
+        <div class="key">Gönderildi</div>
+      </div>
+      <div class="stat fail">
+        <div class="val" id="statFail">0</div>
+        <div class="key">Başarısız</div>
+      </div>
+    </div>
+
+    <div class="log" id="log">
+      <span class="line muted">// Konsol çıktısı burada görünecek...</span>
+    </div>
+  </div>
+
+  <script>
+    // ⚙️ Supabase Edge Function URL — kendi project ref'ini kontrol et
+    const FUNCTION_URL = "https://hlbtdlysmxjcaduaumsh.supabase.co/functions/v1/broadcast-invites";
+
+    function log(msg, type = "info") {
+      const logEl = document.getElementById("log");
+      const line = document.createElement("span");
+      line.className = `line ${type}`;
+      const time = new Date().toLocaleTimeString("tr-TR");
+      line.textContent = `[${time}] ${msg}`;
+      logEl.appendChild(document.createElement("br"));
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    async function sendBroadcast() {
+      const secret = document.getElementById("secret").value.trim();
+      const btn = document.getElementById("sendBtn");
+      const summary = document.getElementById("summary");
+
+      if (!secret) {
+        log("❌ CRON_SECRET boş bırakılamaz.", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.classList.add("loading");
+      btn.textContent = "[ GÖNDERİLİYOR... ]";
+      summary.style.display = "none";
+
+      // Clear log
+      document.getElementById("log").innerHTML = "";
+      log("🔐 Kimlik doğrulanıyor...", "info");
+      log(`📡 İstek gönderiliyor → ${FUNCTION_URL}`, "muted");
+
+      try {
+        const res = await fetch(FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${secret}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          log(`❌ Hata: ${data.error || res.statusText}`, "error");
+        } else {
+          log(`✅ İşlem tamamlandı.`, "success");
+          log(`📨 Gönderilen: ${data.sent} | Başarısız: ${data.failed}`, "info");
+
+          if (data.results && data.results.length > 0) {
+            log("─────────────────────────────────", "muted");
+            data.results.forEach(r => {
+              if (r.success) {
+                log(`  ✓ ${r.email}`, "success");
+              } else {
+                log(`  ✗ ${r.email} — ${r.error || "Bilinmeyen hata"}`, "error");
+              }
+            });
+          } else {
+            log("ℹ️ Pending kayıt bulunamadı.", "muted");
+          }
+
+          // Update summary stats
+          document.getElementById("statSent").textContent = data.sent ?? 0;
+          document.getElementById("statFail").textContent = data.failed ?? 0;
+          summary.style.display = "flex";
+        }
+      } catch (err) {
+        log(`❌ Bağlantı hatası: ${err.message}`, "error");
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove("loading");
+        btn.textContent = "[ DAVET MAİLİ GÖNDER ]";
+      }
+    }
+
+    // Enter key support
+    document.getElementById("secret").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendBroadcast();
+    });
+  </script>
+</body>
+</html>

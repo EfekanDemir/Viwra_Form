@@ -13,15 +13,14 @@ const generateEmailHtml = (kullaniciAdi: string, adayNumarasi: string) => {
     <div class="email-wrapper" style="background-color: #0a062b; width: 100%; padding: 40px 0;">
       <div class="container" style="background-color: #06031b; max-width: 600px; margin: 0 auto; padding: 30px; border-left: 2px solid #4a3b8c;">
       
-      <div style="color: #FFFFFF; font-weight: bold; font-size: 18px; margin-bottom: 30px; border-bottom: 1px dotted #333; padding-bottom: 10px;"># VIWRA: [STATUS: ADMISSION_CONFIRMED]</div>
+      <div style="color: #FFFFFF; font-weight: bold; font-size: 18px; margin-bottom: 30px; border-bottom: 1px dotted #333; padding-bottom: 10px;">📩 VIWRA: [STATUS: ADMISSION_CONFIRMED]</div>
       
       <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[CANDIDATE: ${kullaniciAdi}]</span>
       <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[ID: #${adayNumarasi}]</span>
-      <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[LOCATION: UMUTTEPE_NODE_04]</span>
 
       <div style="font-weight: bold; color: #888888; margin-top: 35px; margin-bottom: 15px; letter-spacing: 1px;">SİSTEM GÜNCELLEMESİ:</div>
       <p>
-        24 saat önce gerçekleştirdiğin odak testi, bilişsel eşiği geçtiğini kanıtladı. Ancak Viwra sadece bir yazılım değil; zihinsel prangaları kırma niyetinde olan bir kolektiftir.
+        Gerçekleştirdiğin odak testi, bilişsel eşiği geçtiğini kanıtladı. Ancak Viwra sadece bir yazılım değil; zihinsel prangaları kırma niyetinde olan bir kolektiftir.
       </p>
       <p>
         Seni sadece bir "kullanıcı" olarak değil, sistemin mimarisine yön verecek bir <strong>Beta Operatörü</strong> ve topluluk bileşeni olarak görüyoruz. Görünmez İplerin ötesini görmek ve projenin derinliklerini bizzat kurucusundan dinlemek üzere özel bir brifinge davet edildin.
@@ -30,7 +29,6 @@ const generateEmailHtml = (kullaniciAdi: string, adayNumarasi: string) => {
       <div style="font-weight: bold; color: #888888; margin-top: 35px; margin-bottom: 15px; letter-spacing: 1px;">TOPLANTI DETAYLARI [SYNAPSE_01]:</div>
       <ul style="list-style-type: square; padding-left: 20px; color: #BBBBBB;">
         <li><strong style="color: #EEEEEE;">AMAÇ:</strong> Viwra Operasyonel Felsefesi, Görünmez İpler Doktrini ve Beta Test Süreci.</li>
-        <li style="margin-top:10px;"><strong style="color: #EEEEEE;">KONUM:</strong> [SENKRONİZASYON BEKLENİYOR] <br/><span style="color:#777; font-size:12px;">// Koordinatlar, aday yoğunluğuna göre hesaplanmaktadır. Kesin konum bilgisi toplantıdan kısa bir süre önce iletilecektir.</span></li>
         <li style="margin-top:10px;"><strong style="color: #EEEEEE;">ZAMAN:</strong> [İLERİ BİR TARİHTE AÇIKLANACAK] <br/><span style="color:#777; font-size:12px;">// Zaman akışı, operasyonel önceliklere göre belirlenmektedir.</span></li>
         <li style="margin-top:10px;"><strong style="color: #EEEEEE;">ERİŞİM:</strong> Sadece bu ID numarasına sahip adaylar kabul edilecektir.</li>
       </ul>
@@ -42,8 +40,7 @@ const generateEmailHtml = (kullaniciAdi: string, adayNumarasi: string) => {
       <a href="#" style="display: inline-block; background-color: #E6E6E6; color: #050505; text-decoration: none; padding: 14px 28px; font-weight: bold; font-size: 14px; letter-spacing: 2px; margin-top: 25px; transition: opacity 0.3s ease;">[KATILIMINI ONAYLA: PROTOKOLE DAHİL OL]</a>
 
       <div style="margin-top: 35px; font-size: 12px; color: #666666;">
-        // NOT: Kapı sadece bir kez açılır. Koordinatlar hesaplandığında bildirim alacaksın. Sessiz kal ve hazır ol.<br/><br/>
-        // KRİTİK: Erişim kodun gelmediyse veya sistem seni askıya aldıysa, bu maili 'Onay' kelimesiyle yanıtla.
+        // NOT: Kapı sadece bir kez açılır. Vakit kararlaştırıldığında bildirim alacaksın. Sessiz kal ve hazır ol.
       </div>
 
       <p style="margin-top: 25px; color: #888;">
