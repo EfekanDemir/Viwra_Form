@@ -251,9 +251,7 @@ export const Scene1: React.FC = () => {
         </p>
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-12 pointer-events-auto">
           <a 
-            href="http://localhost:3001/form" 
-            target="_blank" 
-            rel="noopener noreferrer"
+            href="/form" 
             className="px-8 py-3 border border-viwra-bone/20 rounded-full text-viwra-bone/70 text-xs tracking-[0.3em] uppercase hover:bg-viwra-bone/10 hover:text-viwra-bone hover:border-viwra-bone/50 transition-all duration-500"
             style={{ textShadow: '0 0 10px rgba(10,6,43,0.9)', boxShadow: '0 0 20px rgba(10,6,43,0.5)' }}
           >
