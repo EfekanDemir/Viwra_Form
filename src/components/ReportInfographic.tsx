@@ -10,7 +10,7 @@ export const ReportInfographic: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full bg-viwra-navy overflow-y-auto no-scrollbar font-['Inter'] selection:bg-viwra-bone/20 pb-32">
+    <div className="relative h-full w-full bg-viwra-navy overflow-y-auto no-scrollbar font-['Inter'] selection:bg-viwra-bone/20 pb-32">
       {/* Noise Overlay is assumed to be provided by parent App, but adding a fallback just in case */}
       <div className="pointer-events-none fixed inset-0 z-0 opacity-30 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]"></div>
       
@@ -121,7 +121,7 @@ export const ReportInfographic: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-sm font-medium text-cyan-100/80 tracking-wide">02. Müdahale (Intervention)</div>
-                  <div className="text-xs text-viwra-bone/50 font-light mt-1">Otonom sinir sistemini regüle eden işitsel frekanslar (örn. 852Hz).</div>
+                  <div className="text-xs text-viwra-bone/50 font-light mt-1">Otonom sinir sistemini regüle eden işitsel frekanslar (örn. 852Hz) ve anlık duygu durumuna göre kişiselleştirilmiş sesli öneriler.</div>
                 </div>
               </div>
               <div className="w-[1px] h-6 bg-cyan-900/30 ml-6"></div>
