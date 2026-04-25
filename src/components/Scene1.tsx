@@ -250,20 +250,20 @@ export const Scene1: React.FC = () => {
           {typedText}<span className="animate-pulse opacity-70">|</span>
         </p>
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-12 pointer-events-auto">
-          <a 
-            href="/form" 
-            className="px-8 py-3 border border-viwra-bone/20 rounded-full text-viwra-bone/70 text-xs tracking-[0.3em] uppercase hover:bg-viwra-bone/10 hover:text-viwra-bone hover:border-viwra-bone/50 transition-all duration-500"
+          <button
+            onClick={() => { window.history.pushState({}, '', '/form'); window.dispatchEvent(new PopStateEvent('popstate')); }}
+            className="px-8 py-3 border border-viwra-bone/20 rounded-full text-viwra-bone/70 text-xs tracking-[0.3em] uppercase hover:bg-viwra-bone/10 hover:text-viwra-bone hover:border-viwra-bone/50 transition-all duration-500 cursor-pointer bg-transparent"
             style={{ textShadow: '0 0 10px rgba(10,6,43,0.9)', boxShadow: '0 0 20px rgba(10,6,43,0.5)' }}
           >
             Seçim Protokolüne Katıl
-          </a>
-          <a 
-            href="/rapor" 
-            className="px-8 py-3 bg-viwra-bone/5 border border-viwra-bone/10 rounded-full text-viwra-bone/60 text-xs tracking-[0.3em] uppercase hover:bg-viwra-bone/20 hover:text-viwra-bone transition-all duration-500 backdrop-blur-md"
+          </button>
+          <button
+            onClick={() => { window.history.pushState({}, '', '/rapor'); window.dispatchEvent(new PopStateEvent('popstate')); }}
+            className="px-8 py-3 bg-viwra-bone/5 border border-viwra-bone/10 rounded-full text-viwra-bone/60 text-xs tracking-[0.3em] uppercase hover:bg-viwra-bone/20 hover:text-viwra-bone transition-all duration-500 backdrop-blur-md cursor-pointer"
             style={{ textShadow: '0 0 10px rgba(10,6,43,0.9)' }}
           >
             Stratejik Analiz Raporu
-          </a>
+          </button>
         </div>
       </div>
     </div>
