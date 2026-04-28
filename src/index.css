@@ -240,3 +240,43 @@ select {
 .spin-slow {
   animation: spin-slow 1.5s linear infinite;
 }
+
+/* =============================================
+   VIWRA LOGO — Breathing Rings
+   ============================================= */
+@keyframes breathe-outer {
+  0%, 100% { transform: scale(1);    opacity: 0.22; }
+  50%       { transform: scale(1.07); opacity: 0.50; }
+}
+@keyframes breathe-mid {
+  0%, 100% { transform: scale(1);    opacity: 0.38; }
+  50%       { transform: scale(1.08); opacity: 0.72; }
+}
+@keyframes breathe-inner {
+  0%, 100% { transform: scale(1);    opacity: 0.55; }
+  50%       { transform: scale(1.10); opacity: 0.95; }
+}
+
+.ring-outer {
+  width: 160px; height: 160px;
+  border: 0.6px solid #f4f2e2;
+  border-radius: 50%;
+  position: absolute;
+  animation: breathe-outer 6s ease-in-out infinite;
+}
+.ring-mid {
+  width: 104px; height: 104px;
+  border: 0.8px solid #f4f2e2;
+  border-radius: 50%;
+  position: absolute;
+  animation: breathe-mid 5s ease-in-out infinite;
+  animation-delay: -1.5s;
+}
+.ring-inner {
+  width: 50px; height: 50px;
+  border: 1px solid #f4f2e2;
+  border-radius: 50%;
+  position: absolute;
+  animation: breathe-inner 4s ease-in-out infinite;
+  animation-delay: -0.8s;
+}

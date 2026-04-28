@@ -18,6 +18,20 @@ const Spinner: React.FC = () => (
   </svg>
 );
 
+// Viwra Logo with breathing rings
+const ViwraLogo: React.FC = () => (
+  <div className="relative flex items-center justify-center mb-10" style={{ width: 160, height: 160 }}>
+    <span className="ring-outer" />
+    <span className="ring-mid" />
+    <span className="ring-inner" />
+    <img
+      src="/viwra-logo.webp"
+      alt="Viwra"
+      className="relative z-10 w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(244,242,226,0.35)]"
+    />
+  </div>
+);
+
 // Step dots component
 const StepDots: React.FC<{ current: number; total: number }> = ({ current, total }) => (
   <div className="flex items-center gap-2 mb-14">
@@ -232,7 +246,8 @@ export const Scene2: React.FC = () => {
               geri
             </button>
 
-            {/* Step dots */}
+            {/* Logo + Step dots */}
+            <ViwraLogo />
             <StepDots current={Math.floor(step)} total={3} />
 
             {/* STEP 0 — İsim */}
@@ -536,6 +551,11 @@ export const Scene2: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Cookie Notice */}
+      <p className="absolute bottom-4 left-0 right-0 text-center text-[10px] text-viwra-bone/25 tracking-widest px-4 pointer-events-none">
+        Bu site yalnızca kimlik doğrulama amacıyla zorunlu oturum çerezleri kullanır. İzleme veya pazarlama çerezi kullanılmaz.
+      </p>
     </div>
   );
 };
