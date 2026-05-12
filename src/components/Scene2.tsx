@@ -100,12 +100,7 @@ export const Scene2: React.FC = () => {
   const [emailError, setEmailError] = useState(false);
   const [emailShake, setEmailShake] = useState(false);
 
-  const startTimeRef = useRef<number>(0);
-  const backspaceCountRef = useRef<number>(0);
 
-  useEffect(() => {
-    startTimeRef.current = Date.now();
-  }, []);
 
   const triggerEmailShake = () => {
     setEmailError(true);
@@ -129,7 +124,7 @@ export const Scene2: React.FC = () => {
     } else if (step === 1) {
       if (!email.trim()) return;
       if (!isValidEmail(email)) {
-        triggerEmailShake();
+        setPopupMessage('Lütfen geçerli bir e-posta adresi giriniz.');
         return;
       }
       setEmailError(false);
@@ -137,13 +132,10 @@ export const Scene2: React.FC = () => {
       setIsVerifying(true);
       
       // Check if email already registered in waitlist
-      const { data: existingUser } = await supabase
-        .from('Viwra_Waitlist')
-        .select('email')
-        .eq('email', email)
-        .maybeSingle();
+      const { data: emailExists, error: checkError } = await supabase
+        .rpc('check_email_exists', { p_email: email });
 
-      if (existingUser) {
+      if (emailExists) {
         setIsVerifying(false);
         setPopupMessage('Bu e-posta adresiyle bekleme listesine zaten katılmışsınız.');
         return;
@@ -182,9 +174,7 @@ export const Scene2: React.FC = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>) => {
-    if (e.key === 'Backspace') {
-      backspaceCountRef.current += 1;
-    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       handleNext();
@@ -195,7 +185,6 @@ export const Scene2: React.FC = () => {
     if (!name.trim() || !email.trim() || !altruism) return;
 
     setIsSubmitting(true);
-    const fillTimeMs = Date.now() - startTimeRef.current;
     const finalRef = manualRefCode.trim().toUpperCase();
     const newReferralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -229,8 +218,6 @@ export const Scene2: React.FC = () => {
           full_name: name,
           email: email,
           phone: phone || null,
-          form_fill_time_ms: fillTimeMs,
-          backspace_count: backspaceCountRef.current,
           is_altruistic: altruism === 'yakınım',
           status: usingGoldenKey ? 'vanguard' : 'pending',
           referral_code: newReferralCode,
@@ -338,10 +325,8 @@ export const Scene2: React.FC = () => {
                     autoFocus
                   />
                 </div>
-                {/* Error message */}
-                <div className={`mt-3 h-4 transition-opacity duration-500 ${emailError ? 'opacity-100' : 'opacity-0'}`}>
-                  <span className="text-red-400/60 text-xs tracking-widest">geçersiz e-posta</span>
-                </div>
+                {/* No inline error, using popup instead */}
+
                 {/* Enter hint */}
                 {!emailError && (
                   <div className={`mt-3 h-4 transition-opacity duration-500 ${email.trim() && !emailError ? 'opacity-100' : 'opacity-0'}`}>
@@ -564,7 +549,7 @@ export const Scene2: React.FC = () => {
                   <button
                     onClick={async () => {
                       const shareUrl = `${window.location.origin}/form?ref=${userRefCode}`;
-                      const shareText = `Viwra'ya bekleme listesine katıl ve sırada öne geç! 🚀`;
+                      const shareText = `Viwra'ya bekleme listesine katıl ve sırada öne geç! 🚀 Viwra bekleme listesi`;
                       if (navigator.share) {
                         try {
                           await navigator.share({ title: 'Viwra', text: shareText, url: shareUrl });
@@ -587,7 +572,7 @@ export const Scene2: React.FC = () => {
               <div className="flex items-center justify-center gap-3 mt-4 flex-wrap relative z-10">
                 {/* WhatsApp */}
                 <a
-                  href={`https://wa.me/?text=${encodeURIComponent(`Viwra'ya bekleme listesine katıl ve sırada öne geç! 🚀 ${window.location.origin}/form?ref=${userRefCode}`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`Viwra'ya bekleme listesine katıl ve sırada öne geç! 🚀 ${window.location.origin}/form?ref=${userRefCode} Viwra bekleme listesi`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-viwra-bone/10 bg-viwra-bone/5 hover:bg-[#25D366]/15 hover:border-[#25D366]/30 text-viwra-bone/60 hover:text-[#25D366] transition-all text-xs tracking-wide"
@@ -598,7 +583,7 @@ export const Scene2: React.FC = () => {
 
                 {/* Twitter / X */}
                 <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Viwra'ya bekleme listesine katıl! 🚀`)}&url=${encodeURIComponent(`${window.location.origin}/form?ref=${userRefCode}`)}`}
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Viwra'ya bekleme listesine katıl ve sırada öne geç! 🚀 Viwra bekleme listesi`)}&url=${encodeURIComponent(`${window.location.origin}/form?ref=${userRefCode}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-viwra-bone/10 bg-viwra-bone/5 hover:bg-[#1DA1F2]/15 hover:border-[#1DA1F2]/30 text-viwra-bone/60 hover:text-[#1DA1F2] transition-all text-xs tracking-wide"
@@ -609,7 +594,7 @@ export const Scene2: React.FC = () => {
 
                 {/* Telegram */}
                 <a
-                  href={`https://t.me/share/url?url=${encodeURIComponent(`${window.location.origin}/form?ref=${userRefCode}`)}&text=${encodeURIComponent("Viwra'ya bekleme listesine katıl! 🚀")}`}
+                  href={`https://t.me/share/url?url=${encodeURIComponent(`${window.location.origin}/form?ref=${userRefCode}`)}&text=${encodeURIComponent("Viwra'ya bekleme listesine katıl ve sırada öne geç! 🚀 Viwra bekleme listesi")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-viwra-bone/10 bg-viwra-bone/5 hover:bg-[#2AABEE]/15 hover:border-[#2AABEE]/30 text-viwra-bone/60 hover:text-[#2AABEE] transition-all text-xs tracking-wide"

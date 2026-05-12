@@ -163,6 +163,9 @@
       <p>// Tüm pending kayıtlara davet maili gönder</p>
     </div>
 
+    <label for="functionUrl">FUNCTION URL</label>
+    <input type="text" id="functionUrl" placeholder="https://...supabase.co/functions/v1/broadcast-invites" autocomplete="off" style="margin-bottom:16px;" />
+
     <label for="secret">CRON_SECRET</label>
     <input type="password" id="secret" placeholder="••••••••••••••••" autocomplete="off" />
 
@@ -187,9 +190,6 @@
   </div>
 
   <script>
-    // ⚙️ Supabase Edge Function URL — kendi project ref'ini kontrol et
-    const FUNCTION_URL = "https://hlbtdlysmxjcaduaumsh.supabase.co/functions/v1/broadcast-invites";
-
     function log(msg, type = "info") {
       const logEl = document.getElementById("log");
       const line = document.createElement("span");
@@ -202,10 +202,15 @@
     }
 
     async function sendBroadcast() {
+      const functionUrl = document.getElementById("functionUrl").value.trim();
       const secret = document.getElementById("secret").value.trim();
       const btn = document.getElementById("sendBtn");
       const summary = document.getElementById("summary");
 
+      if (!functionUrl) {
+        log("❌ Function URL boş bırakılamaz.", "error");
+        return;
+      }
       if (!secret) {
         log("❌ CRON_SECRET boş bırakılamaz.", "error");
         return;
@@ -219,10 +224,10 @@
       // Clear log
       document.getElementById("log").innerHTML = "";
       log("🔐 Kimlik doğrulanıyor...", "info");
-      log(`📡 İstek gönderiliyor → ${FUNCTION_URL}`, "muted");
+      log(`📡 İstek gönderiliyor → ${functionUrl}`, "muted");
 
       try {
-        const res = await fetch(FUNCTION_URL, {
+        const res = await fetch(functionUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -268,6 +273,9 @@
     // Enter key support
     document.getElementById("secret").addEventListener("keydown", (e) => {
       if (e.key === "Enter") sendBroadcast();
+    });
+    document.getElementById("functionUrl").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("secret").focus();
     });
   </script>
 </body>

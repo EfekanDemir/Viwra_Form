@@ -5,7 +5,21 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+const escapeHTML = (str: string) => {
+  return str.replace(/[&<>'"]/g, 
+    (tag) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag)
+  );
+};
+
 const generateEmailHtml = (kullaniciAdi: string, adayNumarasi: string) => {
+  const safeAd = escapeHTML(kullaniciAdi);
+  const safeNo = escapeHTML(adayNumarasi);
   return `
   <!DOCTYPE html>
   <html>
@@ -18,8 +32,8 @@ const generateEmailHtml = (kullaniciAdi: string, adayNumarasi: string) => {
       
       <div style="color: #FFFFFF; font-weight: bold; font-size: 18px; margin-bottom: 30px; border-bottom: 1px dotted #333; padding-bottom: 10px;">📩 VIWRA: [STATUS: ADMISSION_CONFIRMED]</div>
       
-      <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[CANDIDATE: ${kullaniciAdi}]</span>
-      <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[ID: #${adayNumarasi}]</span>
+      <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[CANDIDATE: ${safeAd}]</span>
+      <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[ID: #${safeNo}]</span>
 
       <div style="font-weight: bold; color: #888888; margin-top: 35px; margin-bottom: 15px; letter-spacing: 1px;">SİSTEM GÜNCELLEMESİ:</div>
       <p>
@@ -65,16 +79,21 @@ const generateEmailHtml = (kullaniciAdi: string, adayNumarasi: string) => {
   `;
 };
 
+const ALLOWED_ORIGINS = ["https://viwra.com", "https://viwra-form.pages.dev", "http://localhost:3000"];
+
 Deno.serve(async (req) => {
+  const origin = req.headers.get("Origin") || "";
+  const corsOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": corsOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+  };
+
   // CORS for admin panel
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Authorization, Content-Type",
-      },
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   if (req.method !== "POST") {
@@ -86,39 +105,43 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get("Authorization");
 
   if (!EXPECTED_SECRET || authHeader !== `Bearer ${EXPECTED_SECRET}`) {
+    console.error("Unauthorized attempt.");
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
 
   if (!RESEND_API_KEY) {
-    return new Response(JSON.stringify({ error: "RESEND_API_KEY not configured" }), {
+    console.error("RESEND_API_KEY missing.");
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
 
   // Create Supabase admin client (bypasses RLS)
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  // Fetch all pending waitlist entries
+  // Fetch all pending waitlist entries in batches
   const { data: pendingUsers, error: fetchError } = await supabase
-    .from("waitlist")
+    .from("Viwra_Waitlist")
     .select("id, full_name, email")
-    .eq("status", "pending");
+    .eq("status", "pending")
+    .limit(50);
 
   if (fetchError) {
-    return new Response(JSON.stringify({ error: "DB fetch failed", details: fetchError.message }), {
+    console.error("DB fetch failed:", fetchError);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
 
   if (!pendingUsers || pendingUsers.length === 0) {
     return new Response(JSON.stringify({ success: true, sent: 0, message: "No pending users found." }), {
       status: 200,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
 
@@ -133,7 +156,7 @@ Deno.serve(async (req) => {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${RESEND_API_KEY}`,
-          "X-Entity-Ref-ID": `${user.id}-${Date.now()}`,
+          "Idempotency-Key": `invite-${user.id}`,
         },
         body: JSON.stringify({
           from: "Viwra Yetkili Hub <onboarding@viwra.com>",
@@ -146,17 +169,19 @@ Deno.serve(async (req) => {
       if (res.ok) {
         // Mark as invited
         await supabase
-          .from("waitlist")
+          .from("Viwra_Waitlist")
           .update({ status: "invited" })
           .eq("id", user.id);
 
         results.push({ email: user.email, success: true });
       } else {
         const errText = await res.text();
-        results.push({ email: user.email, success: false, error: errText });
+        console.error(`Resend API error for ${user.email}:`, errText);
+        results.push({ email: user.email, success: false, error: "Failed to send email" });
       }
     } catch (err: any) {
-      results.push({ email: user.email, success: false, error: err.message });
+      console.error(`Exception sending email to ${user.email}:`, err);
+      results.push({ email: user.email, success: false, error: "Internal error" });
     }
   }
 
@@ -172,7 +197,7 @@ Deno.serve(async (req) => {
     }),
     {
       status: 200,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     }
   );
 });

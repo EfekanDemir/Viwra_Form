@@ -2,7 +2,21 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
+const escapeHTML = (str: string) => {
+  return str.replace(/[&<>'"]/g, 
+    (tag) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag)
+  );
+};
+
 const generateEmailHtml = (kullaniciAdi: string, adayNumarasi: string) => {
+  const safeAd = escapeHTML(kullaniciAdi);
+  const safeNo = escapeHTML(adayNumarasi);
   return `
   <!DOCTYPE html>
   <html>
@@ -15,8 +29,8 @@ const generateEmailHtml = (kullaniciAdi: string, adayNumarasi: string) => {
       
       <div style="color: #FFFFFF; font-weight: bold; font-size: 18px; margin-bottom: 30px; border-bottom: 1px dotted #333; padding-bottom: 10px;">📩 VIWRA: [STATUS: ADMISSION_CONFIRMED]</div>
       
-      <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[CANDIDATE: ${kullaniciAdi}]</span>
-      <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[ID: #${adayNumarasi}]</span>
+      <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[CANDIDATE: ${safeAd}]</span>
+      <span style="font-weight: 700; display: block; margin: 5px 0; color: #CCCCCC;">[ID: #${safeNo}]</span>
 
       <div style="font-weight: bold; color: #888888; margin-top: 35px; margin-bottom: 15px; letter-spacing: 1px;">SİSTEM GÜNCELLEMESİ:</div>
       <p>
@@ -62,7 +76,22 @@ const generateEmailHtml = (kullaniciAdi: string, adayNumarasi: string) => {
   `;
 };
 
+const ALLOWED_ORIGINS = ["https://viwra.com", "https://viwra-form.pages.dev", "http://localhost:3000"];
+
 Deno.serve(async (req) => {
+  const origin = req.headers.get("Origin") || "";
+  const corsOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": corsOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+  };
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 });
   }
@@ -73,8 +102,8 @@ Deno.serve(async (req) => {
   
   if (!EXPECTED_SECRET || authHeader !== `Bearer ${EXPECTED_SECRET}`) {
      console.error("Unauthorized request blocked by viwra security walls.");
-     return new Response(JSON.stringify({ error: 'Unauthorized CRON secret' }), { 
-        status: 401, headers: { "Content-Type": "application/json" } 
+     return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
+        status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } 
      });
   }
 
@@ -86,13 +115,14 @@ Deno.serve(async (req) => {
 
     if (!targetEmail || !kullaniciAdi || !adayNumarasi) {
       return new Response(JSON.stringify({ error: 'Missing required parameters' }), { 
-        status: 400, headers: { "Content-Type": "application/json" } 
+        status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } 
       });
     }
 
     if (!RESEND_API_KEY) {
-      return new Response(JSON.stringify({ error: 'Resend API Key not configured at Edge' }), { 
-        status: 500, headers: { "Content-Type": "application/json" } 
+      console.error('Resend API Key not configured at Edge');
+      return new Response(JSON.stringify({ error: 'Internal Server Error' }), { 
+        status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } 
       });
     }
 
@@ -103,7 +133,7 @@ Deno.serve(async (req) => {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${RESEND_API_KEY}`,
-        "X-Entity-Ref-ID": Date.now().toString()
+        "Idempotency-Key": `mail-${adayNumarasi}`,
       },
       body: JSON.stringify({
         from: "Viwra Yetkili Hub <onboarding@viwra.com>",
@@ -116,19 +146,20 @@ Deno.serve(async (req) => {
     if (!res.ok) {
         const errorData = await res.text();
         console.error("Resend API Error: ", errorData);
-        return new Response(JSON.stringify({ error: 'Failed to send mail', details: errorData }), {
-            status: 500, headers: { "Content-Type": "application/json" } 
+        return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+            status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } 
         });
     }
 
     const resData = await res.json();
     return new Response(JSON.stringify({ success: true, resendId: resData.id }), {
       status: 200,
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json", ...corsHeaders }
     });
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500, headers: { "Content-Type": "application/json" }
+    console.error("Exception in send-viwra-mail:", error);
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500, headers: { "Content-Type": "application/json", ...corsHeaders }
     });
   }
 });
