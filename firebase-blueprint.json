@@ -1,0 +1,158 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the Viwra app.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The user's unique ID."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the user account was created."
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "A mindfulness session recorded by the user.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who created the session."
+        },
+        "mood": {
+          "type": "string",
+          "description": "The user's stated mood or feeling."
+        },
+        "aiResponse": {
+          "type": "string",
+          "description": "The AI's generated response."
+        },
+        "theme": {
+          "type": "string",
+          "description": "The emotional theme identified by the AI."
+        },
+        "takeaways": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Key takeaways or insights from the session."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the session was created."
+        }
+      },
+      "required": ["userId", "mood", "aiResponse", "createdAt"]
+    },
+    "Feedback": {
+      "title": "Feedback",
+      "description": "User feedback and suggestions.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user submitting the feedback."
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "message": {
+          "type": "string",
+          "description": "The feedback message."
+        },
+        "rating": {
+          "type": "number",
+          "description": "The user's rating (1-5)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the feedback was submitted."
+        }
+      },
+      "required": ["userId", "name", "email", "message", "rating", "createdAt"]
+    },
+    "CommunityPost": {
+      "title": "CommunityPost",
+      "description": "An anonymous or pseudonymous thought shared with the community.",
+      "type": "object",
+      "properties": {
+        "authorId": {
+          "type": "string",
+          "description": "The ID of the user who created the post."
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the post."
+        },
+        "room": {
+          "type": "string",
+          "description": "The room or theme this post belongs to."
+        },
+        "supportCount": {
+          "type": "number",
+          "description": "The number of times this post received support."
+        },
+        "supportedBy": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Array of user IDs who supported this post."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the post was created."
+        }
+      },
+      "required": ["authorId", "text", "room", "supportCount", "supportedBy", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user profiles."
+    },
+    "/sessions/{sessionId}": {
+      "schema": {
+        "$ref": "#/entities/Session"
+      },
+      "description": "Stores user mindfulness sessions."
+    },
+    "/feedback/{feedbackId}": {
+      "schema": {
+        "$ref": "#/entities/Feedback"
+      },
+      "description": "Stores user feedback and suggestions."
+    },
+    "/community_posts/{postId}": {
+      "schema": {
+        "$ref": "#/entities/CommunityPost"
+      },
+      "description": "Stores community posts."
+    }
+  }
+}
