@@ -1,0 +1,5 @@
+{
+  "name": "Viwra",
+  "description": "AI-native mental health and mindfulness ecosystem for high-achieving anxious individuals.",
+  "requestFramePermissions": ["microphone"]
+}

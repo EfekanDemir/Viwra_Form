@@ -220,8 +220,8 @@ JSON ÇIKTI KURALLARI: Lütfen ÇIKTIYI YALNIZCA GEÇERLİ BİR JSON OLARAK VER:
               ...(apiKey ? { 'xi-api-key': apiKey } : {})
             },
             body: JSON.stringify({
-              text: 'Say very slowly and in a calming, meditative tone: ' + text,
-              model_id: 'eleven_multilingual_v2',
+              text: text,
+              model_id: 'eleven_v3',
               voice_settings: {
                 stability: 0.5,
                 similarity_boost: 0.75
