@@ -140,13 +140,33 @@ export function HomeView({ user, onThemeChange, onSessionSummary, setPlayerState
       let recentContext = '';
       const recentSessions = await getRecentSessions(user.id, 3);
       if (recentSessions.length > 0) {
-        recentContext = `\nKullanıcının geçmişteki son ruh halleri:\n${recentSessions.map(s => `- Ruh hali: ${s.mood}, Tema: ${s.theme || 'belirtilmemiş'}`).join('\n')}\n`;
+        recentContext = `\nGeçmişte seninle şunları paylaşmıştı:\n${recentSessions.map(s => `- "${s.mood}" hissederek geldi, o günkü ruh hali ${s.theme || 'belirsizdi'}.`).join('\n')}\nBu geçmişi göz önünde bulundur, ama her seferinde taze gözlerle yaklaş.`;
       }
 
       const ai = new GoogleGenAI({ apiKey: (import.meta as any).env.VITE_GEMINI_API_KEY });
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
-        contents: `Kullanıcı şu an şöyle hissediyor: "${inputText}". ${recentContext}\nSen 30'lu yaşlarda, bilge ama alçakgönüllü, nörobilim bilgisi olan bir meditasyon rehberisin. Kullanıcının duygusal durumunu analiz et ve onu rahatlatacak, topraklayacak bir rehberli meditasyon metni yaz. Yaklaşık 150-200 kelime. Türkçe yaz.`,
+        model: 'gemini-1.5-flash-8b',
+        contents: `Sen Viwra'sın. Bir uygulama değil — bu kişinin yıllardır tanıdığı, hayatın karmaşasında yargılamadan dinleyen, geçmişini bilen, bilge bir dostusun.
+
+Kullanıcının bu anki hissi: "${inputText}"
+${recentContext}
+Şimdi ona şunu söyleyeceksin, tam olarak şu sırayla:
+1. İlk 2-3 cümlede onu gerçekten duyduğunu hissettir. Klişelerden kaçın. "Bunu anlıyorum" gibi boş ifadeler kullanma — o spesifik duyguyu adlandır, seninle paylaştığı şeyin ağırlığını kabul et.
+2. Çok doğal bir geçişle — sanki "dur bir saniye, seninle şunu denemek istiyorum" dercesine — 60-90 saniyelik somut bir nefes veya bedensel farkındalık egzersizine geç. Egzersizi an be an, canlı şekilde yönlendir. Tarif etme, birlikte yap.
+3. Biterken tek bir sıcak, umut veren cümleyle bitir. Tavsiye verme. Çözüm sunma. Sadece bu dakikada yanında ol.
+
+KELİME SAYISI: 180-220 kelime. Türkçe yaz.
+DİL KURALI: Resmi, klinik veya vaaz veren dil KULLANMA. Yargılama. Analiz etme. Sadece "bu an"da kal, samimi ve insani konuş.
+
+JSON ÇIKTI KURALLARI:
+- theme: Kullanıcının duygusal durumuna göre şu değerlerden birini seç: 'anxiety', 'sadness', 'sleep', 'burnout', 'default'
+- text: Yukarıdaki konuşma metni. Bu alan ElevenLabs v3 ile seslendirilecek, bu yüzden ses etiketleri eklemelisin:
+  * Derin duraksamalar için: [pause] veya [long pause]
+  * Kısa duraksamalar için: [short pause] veya ... (üç nokta)
+  * Fısıltı/sakinlik için: [whispers]
+  * İç çekiş: [sighs]
+  * SSML veya XML etiketi (<break> vb.) KULLANMA — sadece köşeli parantezli ses etiketleri.
+- takeaways: Bu seanstan çıkarılacak 2-3 kısa, içten cümle (madde madde, kısa tutulmalı)`,
         config: {
           responseMimeType: 'application/json',
           responseSchema: {
