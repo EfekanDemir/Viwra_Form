@@ -332,9 +332,9 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
     .from('viwra_user_profiles')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+  if (error) throw error;
   if (!data) return null;
 
   return {

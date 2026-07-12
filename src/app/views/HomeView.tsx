@@ -183,17 +183,34 @@ export function HomeView({ user, onThemeChange, onSessionSummary, setPlayerState
       // Start TTS
       const fetchTTS = async (text: string, retries = 3): Promise<void> => {
         try {
-          const ttsResponse = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-tts-preview',
-            contents: [{ parts: [{ text: 'Say very slowly and in a calming, meditative tone: ' + text }] }],
-            config: {
-              responseModalities: ['AUDIO'],
-              speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
+          const apiKey = (import.meta as any).env.VITE_ELEVENLABS_API_KEY;
+          const voiceId = (import.meta as any).env.VITE_ELEVENLABS_VOICE_ID || "21m00Tcm4TlvDq8ikWAM";
+          
+          const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(apiKey ? { 'xi-api-key': apiKey } : {})
             },
+            body: JSON.stringify({
+              text: 'Say very slowly and in a calming, meditative tone: ' + text,
+              model_id: 'eleven_multilingual_v2',
+              voice_settings: {
+                stability: 0.5,
+                similarity_boost: 0.75
+              }
+            })
           });
-          const base64Audio = ttsResponse.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-          setPlayerState({ aiMessage: generatedText, audioQueue: base64Audio ? [base64Audio] : [], isGeneratingComplete: true });
+
+          if (!response.ok) {
+             throw new Error(`ElevenLabs API error: ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const audioUrl = URL.createObjectURL(blob);
+          setPlayerState({ aiMessage: generatedText, audioQueue: [audioUrl], isGeneratingComplete: true });
         } catch (err) {
+          console.error("TTS Error:", err);
           if (retries > 0) { await new Promise(r => setTimeout(r, 2000)); await fetchTTS(text, retries - 1); }
           else setPlayerState({ aiMessage: generatedText, audioQueue: [], isGeneratingComplete: true });
         }

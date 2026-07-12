@@ -85,20 +85,32 @@ export function PlayerView({ theme, aiMessage, audioQueue, setAudioQueue, isGene
       if (ctx.state === 'suspended') ctx.resume().catch(console.error);
       if (!sourceRef.current && audioQueue.length > 0) {
         try {
-          const binaryString = atob(audioQueue[0]);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
-          const buffer = new Int16Array(bytes.buffer);
-          const audioBuffer = ctx.createBuffer(1, buffer.length, 24000);
-          const channelData = audioBuffer.getChannelData(0);
-          for (let i = 0; i < buffer.length; i++) channelData[i] = buffer[i] / 32768.0;
-          const source = ctx.createBufferSource();
-          source.buffer = audioBuffer;
-          source.playbackRate.value = playbackRate;
-          source.connect(ctx.destination);
-          source.onended = () => { sourceRef.current = null; setAudioQueue(prev => prev.slice(1)); };
-          source.start();
-          sourceRef.current = source;
+          const nextAudio = audioQueue[0];
+          const playAudio = async () => {
+            let audioBuffer: AudioBuffer;
+            if (nextAudio.startsWith('blob:') || nextAudio.startsWith('http')) {
+              const res = await fetch(nextAudio);
+              const arrayBuf = await res.arrayBuffer();
+              audioBuffer = await ctx.decodeAudioData(arrayBuf);
+            } else {
+              const binaryString = atob(nextAudio);
+              const bytes = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+              const buffer = new Int16Array(bytes.buffer);
+              audioBuffer = ctx.createBuffer(1, buffer.length, 24000);
+              const channelData = audioBuffer.getChannelData(0);
+              for (let i = 0; i < buffer.length; i++) channelData[i] = buffer[i] / 32768.0;
+            }
+
+            const source = ctx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.playbackRate.value = playbackRate;
+            source.connect(ctx.destination);
+            source.onended = () => { sourceRef.current = null; setAudioQueue(prev => prev.slice(1)); };
+            source.start();
+            sourceRef.current = source;
+          };
+          playAudio().catch(e => { console.error(e); setAudioQueue(prev => prev.slice(1)); });
         } catch (e) { console.error(e); setAudioQueue(prev => prev.slice(1)); }
       }
     } else {
