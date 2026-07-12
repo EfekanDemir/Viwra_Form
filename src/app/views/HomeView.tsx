@@ -143,10 +143,8 @@ export function HomeView({ user, onThemeChange, onSessionSummary, setPlayerState
         recentContext = `\nGeçmişte seninle şunları paylaşmıştı:\n${recentSessions.map(s => `- "${s.mood}" hissederek geldi, o günkü ruh hali ${s.theme || 'belirsizdi'}.`).join('\n')}\nBu geçmişi göz önünde bulundur, ama her seferinde taze gözlerle yaklaş.`;
       }
 
-      const ai = new GoogleGenAI({ apiKey: (import.meta as any).env.VITE_GEMINI_API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
-        contents: `Sen Viwra'sın. Bir uygulama değil — bu kişinin yıllardır tanıdığı, hayatın karmaşasında yargılamadan dinleyen, geçmişini bilen, bilge bir dostusun.
+      const openRouterKey = (import.meta as any).env.VITE_OPENROUTER_API_KEY;
+      const systemPrompt = `Sen Viwra'sın. Bir uygulama değil — bu kişinin yıllardır tanıdığı, hayatın karmaşasında yargılamadan dinleyen, geçmişini bilen, bilge bir dostusun.
 
 Kullanıcının bu anki hissi: "${inputText}"
 ${recentContext}
@@ -158,7 +156,7 @@ ${recentContext}
 KELİME SAYISI: 180-220 kelime. Türkçe yaz.
 DİL KURALI: Resmi, klinik veya vaaz veren dil KULLANMA. Yargılama. Analiz etme. Sadece "bu an"da kal, samimi ve insani konuş.
 
-JSON ÇIKTI KURALLARI:
+JSON ÇIKTI KURALLARI: Lütfen ÇIKTIYI YALNIZCA GEÇERLİ BİR JSON OLARAK VER:
 - theme: Kullanıcının duygusal durumuna göre şu değerlerden birini seç: 'anxiety', 'sadness', 'sleep', 'burnout', 'default'
 - text: Yukarıdaki konuşma metni. Bu alan ElevenLabs v3 ile seslendirilecek, bu yüzden ses etiketleri eklemelisin:
   * Derin duraksamalar için: [pause] veya [long pause]
@@ -166,35 +164,44 @@ JSON ÇIKTI KURALLARI:
   * Fısıltı/sakinlik için: [whispers]
   * İç çekiş: [sighs]
   * SSML veya XML etiketi (<break> vb.) KULLANMA — sadece köşeli parantezli ses etiketleri.
-- takeaways: Bu seanstan çıkarılacak 2-3 kısa, içten cümle (madde madde, kısa tutulmalı)`,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              theme: { type: Type.STRING },
-              text: { type: Type.STRING },
-              takeaways: { type: Type.ARRAY, items: { type: Type.STRING } },
-            },
-            required: ['theme', 'text', 'takeaways'],
-          },
+- takeaways: Bu seanstan çıkarılacak 2-3 kısa, içten cümle (madde madde, kısa tutulmalı)`;
+
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${openRouterKey}`,
+          "Content-Type": "application/json"
         },
+        body: JSON.stringify({
+          model: "google/gemini-2.0-flash-lite-preview-02-05:free",
+          messages: [
+            { role: "user", content: systemPrompt }
+          ],
+          response_format: { type: "json_object" }
+        })
       });
+
+      if (!response.ok) {
+        throw new Error(`OpenRouter API error: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      const responseText = responseData.choices[0]?.message?.content || "";
 
       let generatedText = 'Derin bir nefes al. Yalnız değilsin, buradayım.';
       let generatedTheme: ThemeState = 'default';
       let generatedTakeaways: string[] = [];
 
-      if (response.text) {
+      if (responseText) {
         try {
-          const parsed = JSON.parse(response.text);
+          const parsed = JSON.parse(responseText);
           generatedText = parsed.text || generatedText;
           generatedTakeaways = parsed.takeaways || [];
           if (['default', 'anxiety', 'sadness', 'sleep', 'burnout'].includes(parsed.theme)) {
             generatedTheme = parsed.theme as ThemeState;
             onThemeChange(generatedTheme);
           }
-        } catch { generatedText = response.text.trim(); }
+        } catch { generatedText = responseText.trim(); }
       }
 
       const summary: SessionSummary = { mood: inputText, aiResponse: generatedText, theme: generatedTheme, takeaways: generatedTakeaways };
