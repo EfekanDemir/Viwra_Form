@@ -164,7 +164,7 @@ JSON ÇIKTI KURALLARI: Lütfen ÇIKTIYI YALNIZCA GEÇERLİ BİR JSON OLARAK VER:
   * Fısıltı/sakinlik için: [whispers]
   * İç çekiş: [sighs]
   * SSML veya XML etiketi (<break> vb.) KULLANMA — sadece köşeli parantezli ses etiketleri.
-- takeaways: Bu seanstan çıkarılacak 2-3 kısa, içten cümle (madde madde, kısa tutulmalı)`;
+- takeaways: Bu seanstan çıkarılacak 2-3 kısa, içten cümleden oluşan BİR DİZİ (Array). Örnek: ["Birinci cümle.", "İkinci cümle."]`;
 
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -223,8 +223,8 @@ JSON ÇIKTI KURALLARI: Lütfen ÇIKTIYI YALNIZCA GEÇERLİ BİR JSON OLARAK VER:
               text: text,
               model_id: 'eleven_v3',
               voice_settings: {
-                stability: 0.5,
-                similarity_boost: 0.75
+                stability: 0.75,
+                similarity_boost: 0.85
               }
             })
           });

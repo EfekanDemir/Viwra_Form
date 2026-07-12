@@ -264,8 +264,8 @@ Sadece şefkatli, sakin, anı hissetmesini sağlayan ve yanında olduğunu hisse
                 text: text,
                 model_id: 'eleven_v3',
                 voice_settings: {
-                  stability: 0.5,
-                  similarity_boost: 0.75
+                  stability: 0.75,
+                  similarity_boost: 0.85
                 }
               })
             });
