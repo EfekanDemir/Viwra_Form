@@ -145,7 +145,7 @@ export function HomeView({ user, onThemeChange, onSessionSummary, setPlayerState
 
       const ai = new GoogleGenAI({ apiKey: (import.meta as any).env.VITE_GEMINI_API_KEY });
       const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: `Sen Viwra'sın. Bir uygulama değil — bu kişinin yıllardır tanıdığı, hayatın karmaşasında yargılamadan dinleyen, geçmişini bilen, bilge bir dostusun.
 
 Kullanıcının bu anki hissi: "${inputText}"
