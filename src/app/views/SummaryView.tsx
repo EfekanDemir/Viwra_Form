@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Check } from 'lucide-react';
@@ -31,6 +31,12 @@ export function SummaryView({ user, summary }: SummaryViewProps) {
       setIsSaving(false);
     }
   };
+
+  // Otomatik kaydet — görünüm açılır açılmaz seans kaydedilir
+  useEffect(() => {
+    handleSave();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!summary) {
     return (

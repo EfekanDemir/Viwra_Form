@@ -7,6 +7,7 @@ import type { User } from '@supabase/supabase-js';
 import { saveJournalEntry, getJournalEntries, deleteJournalEntry, getRecentSessions, type JournalEntry } from '../services/viwraApi';
 import { getUserFriendlyErrorMessage } from '../errorUtils';
 import type { ThemeState, SessionSummary } from '../ViwraApp';
+import { RateLimitModal, isRateLimitError } from '../components/RateLimitModal';
 
 interface DeepReflectionViewProps {
   user: User | null;
@@ -25,6 +26,7 @@ export function DeepReflectionView({ user, onComplete }: DeepReflectionViewProps
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showRateLimit, setShowRateLimit] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'history' && user) {
@@ -103,9 +105,13 @@ export function DeepReflectionView({ user, onComplete }: DeepReflectionViewProps
         takeaways: generatedTakeaways,
       });
       navigate('/summary');
-    } catch {
-      onComplete({ mood: `İçsel Keşif: ${reflection.substring(0, 50)}...`, aiResponse: 'Şu an zihninin çok dolu olduğunu hissediyorum. Sadece nefes al, buradayım.', theme: 'default', takeaways: [] });
-      navigate('/summary');
+    } catch (err) {
+      if (isRateLimitError(err)) {
+        setShowRateLimit(true);
+      } else {
+        onComplete({ mood: `İçsel Keşif: ${reflection.substring(0, 50)}...`, aiResponse: 'Şu an zihninin çok dolu olduğunu hissediyorum. Sadece nefes al, buradayım.', theme: 'default', takeaways: [] });
+        navigate('/summary');
+      }
     } finally {
       setIsThinking(false);
     }
@@ -119,6 +125,11 @@ export function DeepReflectionView({ user, onComplete }: DeepReflectionViewProps
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.5 }} className="flex flex-col h-full pt-16 p-6 pb-32 overflow-y-auto">
+      <RateLimitModal
+        isOpen={showRateLimit}
+        onClose={() => setShowRateLimit(false)}
+        onRetry={() => { setShowRateLimit(false); handleReflect(); }}
+      />
       <div className="flex-1 flex flex-col max-w-xl mx-auto w-full mt-4 space-y-8">
         <div className="text-center space-y-4">
           <Brain className="w-8 h-8 opacity-40 mx-auto mb-2" strokeWidth={1.5} />

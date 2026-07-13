@@ -180,7 +180,7 @@ export default function App() {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         // Fast AI Response using flash-lite
         const response = await ai.models.generateContent({
-          model: 'gemini-3.1-flash-lite-preview',
+          model: 'gemini-3.1-pro',
           contents: `Kullanıcı şu an şöyle hissediyor: "${inputText}". ${recentContext}
 Sen 30'lu yaşlarda, bilge ama alçakgönüllü, nörobilim bilgisi olan bir meditasyon rehberisin.
 Kullanıcının duygusal durumunu analiz et ve onu rahatlatacak, topraklayacak ve anlaşıldığını hissettirecek bir rehberli meditasyon metni yaz.
@@ -1695,7 +1695,7 @@ function DeepReflectionView({ onBack, onComplete, user }: DeepReflectionViewProp
 
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-3.1-pro',
         contents: `Kullanıcı derin bir düşünce/günlük girişi yazdı: "${reflection}". ${recentContext}
 Sen 30'lu yaşlarda, bilge ama alçakgönüllü, nörobilim bilgisi olan bir rehbersin.
 Bu düşüncenin altındaki temel duyguyu veya ihtiyacı analiz et. 

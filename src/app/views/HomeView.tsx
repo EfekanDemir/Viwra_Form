@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Mic, Send, MessageSquare, LogOut, User as UserIcon } from 'lucide-react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI, ThinkingLevel, Type } from '@google/genai';
 import type { User } from '@supabase/supabase-js';
 import { getUserProfile, logOut, getRecentSessions } from '../services/viwraApi';
 import type { ThemeState, SessionSummary } from '../ViwraApp';
+import { RateLimitModal, isRateLimitError } from '../components/RateLimitModal';
 
 // Global AudioContext
 let globalAudioCtx: AudioContext | null = null;
@@ -82,6 +83,7 @@ export function HomeView({ user, onThemeChange, onSessionSummary, setPlayerState
   const [recognition, setRecognition] = useState<any>(null);
   const [micError, setMicError] = useState<string | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
+  const [showRateLimit, setShowRateLimit] = useState(false);
 
   useEffect(() => {
     getUserProfile(user.id).then(p => {
@@ -143,7 +145,7 @@ export function HomeView({ user, onThemeChange, onSessionSummary, setPlayerState
         recentContext = `\nGeçmişte seninle şunları paylaşmıştı:\n${recentSessions.map(s => `- "${s.mood}" hissederek geldi, o günkü ruh hali ${s.theme || 'belirsizdi'}.`).join('\n')}\nBu geçmişi göz önünde bulundur, ama her seferinde taze gözlerle yaklaş.`;
       }
 
-      const openRouterKey = (import.meta as any).env.VITE_OPENROUTER_API_KEY;
+      // const openRouterKey = (import.meta as any).env.VITE_OPENROUTER_API_KEY;
       const systemPrompt = `Sen Viwra'sın. Bir uygulama değil — bu kişinin yıllardır tanıdığı, hayatın karmaşasında yargılamadan dinleyen, geçmişini bilen, bilge bir dostusun.
 
 Kullanıcının bu anki hissi: "${inputText}"
@@ -166,27 +168,26 @@ JSON ÇIKTI KURALLARI: Lütfen ÇIKTIYI YALNIZCA GEÇERLİ BİR JSON OLARAK VER:
   * SSML veya XML etiketi (<break> vb.) KULLANMA — sadece köşeli parantezli ses etiketleri.
 - takeaways: Bu seanstan çıkarılacak 2-3 kısa, içten cümleden oluşan BİR DİZİ (Array). Örnek: ["Birinci cümle.", "İkinci cümle."]`;
 
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${openRouterKey}`,
-          "Content-Type": "application/json"
+      const ai = new GoogleGenAI({ apiKey: (import.meta as any).env.VITE_GEMINI_API_KEY });
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.1-pro-preview',
+        contents: systemPrompt,
+        config: {
+          thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              theme: { type: Type.STRING },
+              text: { type: Type.STRING },
+              takeaways: { type: Type.ARRAY, items: { type: Type.STRING } },
+            },
+            required: ['theme', 'text', 'takeaways'],
+          },
         },
-        body: JSON.stringify({
-          model: "openrouter/free",
-          messages: [
-            { role: "user", content: systemPrompt }
-          ],
-          response_format: { type: "json_object" }
-        })
       });
 
-      if (!response.ok) {
-        throw new Error(`OpenRouter API error: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-      const responseText = responseData.choices[0]?.message?.content || "";
+      const responseText = response.text || "";
 
       let generatedText = 'Derin bir nefes al. Yalnız değilsin, buradayım.';
       let generatedTheme: ThemeState = 'default';
@@ -247,8 +248,13 @@ JSON ÇIKTI KURALLARI: Lütfen ÇIKTIYI YALNIZCA GEÇERLİ BİR JSON OLARAK VER:
       fetchTTS(generatedText);
     } catch (error) {
       console.error('AI Error:', error);
-      setPlayerState({ aiMessage: 'Derin bir nefes al. Yalnız değilsin, buradayım.', audioQueue: [], isGeneratingComplete: true });
-      navigate('/player');
+      if (isRateLimitError(error)) {
+        navigate('/home');
+        setShowRateLimit(true);
+      } else {
+        setPlayerState({ aiMessage: 'Derin bir nefes al. Yalnız değilsin, buradayım.', audioQueue: [], isGeneratingComplete: true });
+        navigate('/player');
+      }
     }
   };
 
@@ -262,6 +268,11 @@ JSON ÇIKTI KURALLARI: Lütfen ÇIKTIYI YALNIZCA GEÇERLİ BİR JSON OLARAK VER:
       transition={{ duration: 1.5 }}
       className="flex flex-col min-h-full justify-between p-6 pb-32"
     >
+      <RateLimitModal
+        isOpen={showRateLimit}
+        onClose={() => setShowRateLimit(false)}
+        onRetry={() => { setShowRateLimit(false); handleSubmit(); }}
+      />
       <div className="absolute top-6 right-6 z-50 flex items-center space-x-2">
         <button onClick={() => navigate('/profile')} className="p-3 rounded-full bg-black/5 dark:bg-white/5 opacity-40 hover:opacity-100 transition-opacity duration-700" aria-label="Profil">
           <UserIcon className="w-4 h-4" />
