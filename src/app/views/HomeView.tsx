@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Mic, Send, MessageSquare, LogOut, User as UserIcon } from 'lucide-react';
 import { GoogleGenAI, ThinkingLevel, Type } from '@google/genai';
 import type { User } from '@supabase/supabase-js';
@@ -78,12 +78,23 @@ function HrvTeaser() {
 
 export function HomeView({ user, onThemeChange, onSessionSummary, setPlayerState }: HomeViewProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [inputText, setInputText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const [micError, setMicError] = useState<string | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [showRateLimit, setShowRateLimit] = useState(false);
+
+  // Navigate state'ten gelen rate limit flag'ini oku
+  useEffect(() => {
+    if ((location.state as any)?.showRateLimit) {
+      setShowRateLimit(true);
+      // State'i temizle (sayfa yenilemede tekrar açılmasın)
+      window.history.replaceState({}, '');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     getUserProfile(user.id).then(p => {
@@ -249,8 +260,7 @@ JSON ÇIKTI KURALLARI: Lütfen ÇIKTIYI YALNIZCA GEÇERLİ BİR JSON OLARAK VER:
     } catch (error) {
       console.error('AI Error:', error);
       if (isRateLimitError(error)) {
-        navigate('/home');
-        setShowRateLimit(true);
+        navigate('/home', { state: { showRateLimit: true } });
       } else {
         setPlayerState({ aiMessage: 'Derin bir nefes al. Yalnız değilsin, buradayım.', audioQueue: [], isGeneratingComplete: true });
         navigate('/player');
