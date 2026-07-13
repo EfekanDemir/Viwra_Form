@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { BetaAccess } from './components/BetaAccess';
+import { LandingPage } from './components/LandingPage';
 import ViwraApp from './app/ViwraApp';
 
 function LegacyRedirect() {
@@ -22,6 +23,9 @@ export default function App() {
 
             {/* Beta Gatekeeper — email verification before entering app */}
             <Route path="/login" element={<BetaAccess />} />
+
+            {/* Landing Page — viwra.com root */}
+            <Route path="/" element={<LandingPage />} />
 
             {/* Viwra App — all subroutes handled inside ViwraApp */}
             <Route path="/*" element={<ViwraApp />} />

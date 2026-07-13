@@ -181,7 +181,7 @@ JSON ÇIKTI KURALLARI: Lütfen ÇIKTIYI YALNIZCA GEÇERLİ BİR JSON OLARAK VER:
 
       const ai = new GoogleGenAI({ apiKey: (import.meta as any).env.VITE_GEMINI_API_KEY });
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-2.5-flash',
         contents: systemPrompt,
         config: {
           thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },

@@ -66,7 +66,7 @@ export function DeepReflectionView({ user, onComplete }: DeepReflectionViewProps
       }
       const ai = new GoogleGenAI({ apiKey: (import.meta as any).env.VITE_GEMINI_API_KEY });
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-2.5-flash',
         contents: `Kullanıcı derin bir düşünce/günlük girişi yazdı: "${reflection}". ${recentContext}\nBu düşüncenin altındaki temel duyguyu veya ihtiyacı analiz et. Maksimum 3-4 cümlelik, derin, topraklayıcı bir yanıt ver. Türkçe yaz.`,
         config: {
           thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
