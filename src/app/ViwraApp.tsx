@@ -206,8 +206,15 @@ export default function ViwraApp() {
                 element={<RequireBeta><MindmapView user={user} /></RequireBeta>}
               />
 
-              {/* Default catch-all for /* */}
-              <Route path="*" element={<Navigate to={`/home${window.location.search}${window.location.hash}`} replace />} />
+              {/* Default catch-all: auth callback hash → /home, unknown routes → /404 */}
+              <Route
+                path="*"
+                element={
+                  window.location.hash || window.location.search
+                    ? <Navigate to={`/home${window.location.search}${window.location.hash}`} replace />
+                    : <Navigate to="/404" replace />
+                }
+              />
             </Routes>
           </AnimatePresence>
         </Suspense>

@@ -2,6 +2,10 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { BetaAccess } from './components/BetaAccess';
 import { LandingPage } from './components/LandingPage';
+import { KvkkPage } from './components/KvkkPage';
+import { GizlilikPage } from './components/GizlilikPage';
+import { KosullarPage } from './components/KosullarPage';
+import { NotFoundPage } from './components/NotFoundPage';
 import ViwraApp from './app/ViwraApp';
 
 function LegacyRedirect() {
@@ -21,13 +25,21 @@ export default function App() {
             {/* Legacy /app/* redirects to /* while preserving auth hashes */}
             <Route path="/app/*" element={<LegacyRedirect />} />
 
-            {/* Beta Gatekeeper — email verification before entering app */}
+            {/* Beta Gatekeeper */}
             <Route path="/login" element={<BetaAccess />} />
 
-            {/* Landing Page — viwra.com root */}
+            {/* Landing Page */}
             <Route path="/" element={<LandingPage />} />
 
-            {/* Viwra App — all subroutes handled inside ViwraApp */}
+            {/* Legal Pages */}
+            <Route path="/kvkk" element={<KvkkPage />} />
+            <Route path="/gizlilik" element={<GizlilikPage />} />
+            <Route path="/kosullar" element={<KosullarPage />} />
+
+            {/* 404 */}
+            <Route path="/404" element={<NotFoundPage />} />
+
+            {/* Viwra App */}
             <Route path="/*" element={<ViwraApp />} />
           </Routes>
         </div>
