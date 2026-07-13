@@ -234,52 +234,6 @@ function WaitlistModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ─── Ripple Background ────────────────────────────────────────────────────────
-const RING_COUNT = 6;
-const RING_DURATION = 7; // saniye
-const RING_STAGGER = RING_DURATION / RING_COUNT;
-
-function RippleBackground() {
-  return (
-    <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
-      {/* Merkezde cok hafif bir parlama */}
-      <div
-        className="absolute rounded-full"
-        style={{
-          width: 180,
-          height: 180,
-          background: 'radial-gradient(circle, rgba(244,242,226,0.04) 0%, transparent 70%)',
-          filter: 'blur(12px)',
-        }}
-      />
-      {/* Yayilan halkalar */}
-      {Array.from({ length: RING_COUNT }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            width: 160,
-            height: 160,
-            border: '1px solid rgba(244, 242, 226, 0.09)',
-            boxShadow: '0 0 12px rgba(244, 242, 226, 0.04), inset 0 0 12px rgba(244, 242, 226, 0.02)',
-          }}
-          animate={{
-            scale: [0.4, 7],
-            opacity: [0.6, 0],
-          }}
-          transition={{
-            duration: RING_DURATION,
-            repeat: Infinity,
-            delay: i * RING_STAGGER,
-            ease: [0.1, 0.4, 0.6, 1],
-            repeatDelay: 0,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 // ─── Landing Page ─────────────────────────────────────────────────────────────
 export function LandingPage() {
   const navigate = useNavigate();
@@ -302,10 +256,6 @@ export function LandingPage() {
     <div className="relative min-h-screen bg-[#0a062b] text-[#f4f2e2] font-sans overflow-x-hidden">
       {/* Noise */}
       <div className="noise-overlay pointer-events-none fixed inset-0 z-0 opacity-30" />
-
-      {/* Ripple rings */}
-      <RippleBackground />
-
       {/* Waitlist Modal */}
       {showModal && <WaitlistModal onClose={() => setShowModal(false)} />}
 
